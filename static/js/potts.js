@@ -1,10 +1,11 @@
-$('.datepicker').pickadate({
-    selectMonths: true, // Creates a dropdown to control month
-    selectYears: 15 // Creates a dropdown of 15 years to control year
-});
+var userIdVal = -1;
+
+function globalizeUserID(n) {
+  userIdVal = n;
+}
 
 function loginHandler(data) {
-  if(data.result["status"] != "ok") {
+  if(data.result["status"] == "ok") {
     $(".login").fadeOut(200);
     $(".mainView").fadeIn(200);
     drawSpendingChart([233.07,27.66,102.03,318.69,329.13,159.33,131.87, 52.93, 0, 0, 0 ,0]);
@@ -13,6 +14,63 @@ function loginHandler(data) {
   else {
     $(".login").effect("shake");
   }
+}
+
+function addSelectOptions(source, selectID, type) {
+  var array = $(source);
+  var d = {};
+  for(var i = 0; i < array.length; i++) {
+    if(!(array[i].textContent in d)) {
+      d[array[i].textContent] = "";
+    }
+  }
+  $(selectID).empty().append('<option value="" disabled selected>' + type + '</option>');
+  for(var k in d) {
+    $(selectID).append('<option value="">' + k + '</option>');  
+  }
+}
+
+function removeSelectOptions(check, selectID) {
+  var array = $(selectID);
+  for(var i = 0; i < array.length; i++) {
+    if(array[i].textContent == check) {
+      array[i].remove();
+    }
+  }
+}
+
+function listCategory(data) {
+  var resultArray = data.result["result"];
+  $("#editCategoryResult").empty();
+  var removeButton = '<div class="col s1"><a class="removeCateg btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></div>';
+  for(var i = 0; i < resultArray.length; i++) {
+    $("#editCategoryResult").append('<div class="row"><div class="col s6 selectCategory"><p>' + resultArray[i][0] + '</p></div><div class="col s5 selectSubCategory"><p>' 
+                                                        + resultArray[i][1] + '</p></div>'
+                                                        + removeButton + '</div>');
+  }
+  $(".removeCateg").click(function() {
+    var o = $(this).parent().parent();
+    var c = o.find("div.selectCategory p").text();
+    var s = o.find("div.selectSubCategory p").text();
+
+    $.getJSON('/delCategory', {userId: userIdVal, rCateg: c, rSubCateg: s}, function(data) {
+      if(data.result["status"] == "ok") {
+        o.remove();
+        removeSelectOptions(c, "#selectCategory option");
+        removeSelectOptions(s, "#selectSubCategory option");
+        addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
+        addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+      }
+    });
+  });
+}
+
+function bindEnterKey(query, functionName) {
+  $(query).bind('keydown', function(e) {
+        if(e.keyCode == 13) {
+          functionName();
+        }
+  });
 }
 
 function drawSpendingChart(spendingData) {
