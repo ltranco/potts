@@ -1,0 +1,30 @@
+from flask import Flask, jsonify, render_template, request
+from flaskext.mysql import MySQL
+
+mysql = MySQL()
+app = Flask(__name__)
+app.debug = True
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'potts'
+app.config['MYSQL_DATABASE_DB'] = 'PottsUsers'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
+@app.route("/authenticate")
+def authenticate():
+    username = request.args.get('usr')
+    password = request.args.get('pwd')
+    cursor = mysql.connect().cursor()
+    cursor.execute("SELECT * from User where Username='" + username + "' and Password='" + password + "'")
+    data = cursor.fetchone()
+    if data is None:
+    	return jsonify(result={"status":"failed"})
+    else:
+    	return jsonify(result={"status":"ok"})
+
+@app.route("/")
+def index():
+	return render_template('index.html')
+ 
+if __name__ == "__main__":
+    app.run()
