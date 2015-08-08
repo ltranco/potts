@@ -32,3 +32,17 @@ body {
 .mainView {
 	display: none;
 }
+
+#navigationSideBar {
+	padding-top: 15%;
+}
+
+.navItem {
+	font-size: 15px;
+	font-weight: bold;
+	margin-right: 2px;
+}
+
+.rightView {
+	margin-left: 10%;
+}

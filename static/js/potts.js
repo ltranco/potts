@@ -1,4 +1,50 @@
 var userIdVal = -1;
+var views = ["#cashFlowView", "#allocationView", "#editView"];
+
+function Potts() {
+  $("#loginButton").click(function() {loginButtonHandler();});
+  $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
+  $("#cashFlowView").click(function() {displayView("#cashFlowView");});
+  $("#allocationView").click(function() {displayView("#allocationView");});
+  $("#editView").click(function() {displayView("#editView");});
+  bindEnterKey("input[name='usr']", loginButtonHandler);
+  bindEnterKey("input[name='pwd']", loginButtonHandler);
+  bindEnterKey("input[name='addCateg']", addCategoryButtonHandler);
+  bindEnterKey("input[name='addSubCateg']", addCategoryButtonHandler);
+}
+
+function displayView(s) {
+  var n = 200;
+  for(var i = 0; i < views.length; i++) {
+    if(s == views[i]) {
+      $(s).fadeIn(n);
+    }
+    else {
+      $(views[i]).fadeOut(n);
+    }
+  }
+}
+
+function queryCategory() {
+    $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
+        listCategory(data);
+        addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
+        addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+    });
+};
+
+function addCategoryButtonHandler() {
+    $.getJSON('/addCategory', {userId: userIdVal, categ: $('input[name="addCateg"]').val(), sub: $('input[name="addSubCateg"]').val()}, function(data) {queryCategory();});
+}
+
+function loginButtonHandler() {
+    $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
+        userIdVal = data.result["userId"];
+        loginHandler(data);
+        queryCategory();
+        globalizeUserID(userIdVal);
+    });
+}
 
 function globalizeUserID(n) {
   userIdVal = n;
@@ -9,7 +55,6 @@ function loginHandler(data) {
     $(".login").fadeOut(200);
     $(".mainView").fadeIn(200);
     drawSpendingChart([233.07,27.66,102.03,318.69,329.13,159.33,131.87, 52.93, 0, 0, 0 ,0]);
-    drawAllocationChart();
   }
   else {
     $(".login").effect("shake");
@@ -48,6 +93,7 @@ function listCategory(data) {
                                                         + resultArray[i][1] + '</p></div>'
                                                         + removeButton + '</div>');
   }
+  drawAllocationChart();
   $(".removeCateg").click(function() {
     var o = $(this).parent().parent();
     var c = o.find("div.selectCategory p").text();
@@ -60,6 +106,7 @@ function listCategory(data) {
         removeSelectOptions(s, "#selectSubCategory option");
         addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
         addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+        drawAllocationChart();
       }
     });
   });
@@ -100,11 +147,25 @@ function setColorArray(color) {
         return colors;
     }());
 }
- 
+
+function getCategoryArray() {
+  var data = [];
+  var d = {};
+  var array = $("div.selectCategory p");
+  for(var i = 0; i < array.length; i++) {
+    if(!(array[i].textContent in d)) {
+      data.push({name:array[i].textContent, y: 56.33});
+      d[array[i].textContent] = "";  
+    }
+  }
+  return data;
+}
+
 function drawAllocationChart() {
   setColorArray("#00c96d");
-  $('#allocationChart').highcharts({
-    chart: {plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
+  var dataArray = getCategoryArray();
+  var options = {
+    chart: {renderTo: 'allocationChart', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
     title: {text: ""},
     tooltip: {pointFormat: '<b>{point.percentage:.1f}%</b>'},
     plotOptions: {
@@ -119,23 +180,11 @@ function drawAllocationChart() {
     },
     series: [{
         colorByPoint: true,
-        data: [{
-            name: "IE",
-            y: 56.33
-        }, {
-            name: "Chrome",
-            y: 24.03
-        }, {
-            name: "Firefox",
-            y: 10.38
-        }, {
-            name: "Safari",
-            y: 4.77
-        }, {
-            name: "Opera",
-            y: 0.91
-        }]
+        data: dataArray
     }],
     navigation: {buttonOptions: {enabled: false}}
-  });
+  };
+  var chart = new Highcharts.Chart(options);
 }
+
+

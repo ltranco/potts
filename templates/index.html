@@ -8,100 +8,117 @@
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
     <link rel="stylesheet" type="text/css" href="static/css/materialize.min.css" media="screen,projection"/>
     <body>
-    <div class="container">
-        <div class="login">
-            <h3 class="light">Potts</h3>
-            <h5 class="light"> The Personal Finance Assistant</h5>
-            <div class="input-field col s5">
-              <input value="" type="text" placeholder="Username" name="usr" class="validate">
-              
-            </div>
-            <div class="input-field col s5">
-              <input value="" type="password" name="pwd" placeholder="Password" class="validate">
-            </div>
-            <div class="row">
-                <a id="loginButton" class="btn">Log In</a>
-                <a class="btn">Reset</a>
-            </div>
+        <div class="leftView">
+            <ul id="navigationSideBar" class="side-nav fixed" style="width:170px;">
+                <li class="bold"><a id="cashFlowView" class="waves-effect waves-teal"><i class="material-icons navItem">attach_money</i>CASH FLOW</a></li>
+                <li class="bold"><a id="allocationView" class="waves-effect waves-teal"><i class="material-icons navItem">shopping_cart</i>ALLOCATION</a></li>
+                <li class="bold"><a id="editView" class="waves-effect waves-teal"><i class="material-icons navItem">mode_edit</i>EDIT</a></li>
+            </ul>
         </div>
-        <div class="mainView">
-            <div class="snapshot">
-                <div class="row">
-                    <div class="col s3">
-                        <div class="card amber darken-3">
-                            <div class="card-content white-text">
-                                <span class="card-title">$100,000</span>
-                                <p>Net Worth</p>
-                            </div>
-                        </div>
+        <div class="rightView">
+            <div class="container">
+                <div class="login">
+                    <h3 class="light">Potts</h3>
+                    <h5 class="light"> The Personal Finance Assistant</h5>
+                    <div class="input-field col s5">
+                      <input value="" type="text" placeholder="Username" name="usr" class="validate">
+                      
                     </div>
-                    <div class="col s3">
-                        <div class="card amber darken-3">
-                            <div class="card-content white-text">
-                                <span class="card-title">90%</span>
-                                <p>Saving Rate</p>
-                            </div>
-                        </div>
+                    <div class="input-field col s5">
+                      <input value="" type="password" name="pwd" placeholder="Password" class="validate">
                     </div>
-                    <div class="col s3">
-                        <div class="card amber darken-3">
-                            <div class="card-content white-text">
-                                <span class="card-title">$10,000</span>
-                                <p>Income</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col s3">
-                        <div class="card amber darken-3">
-                            <div class="card-content white-text">
-                                <span class="card-title">$1,000</span>
-                                <p>Expenses</p>
-                            </div>
-                        </div>
+                    <div class="row">
+                        <a id="loginButton" class="btn">Log In</a>
+                        <a class="btn">Reset</a>
                     </div>
                 </div>
-            </div>
-            <h4 class="light">Cash Flow Summary</h4>
-            <div align="center" id="spendingChart"></div>
-            <h4 class="light">Spending Allocation</h4>
-            <div align="center" id="allocationChart"></div>
-            <h4 class="light">Record an Expense</h4>
-            <div id="record">
-                <div class="row">
-                    <div class="col s2">
-                        <select class="browser-default" id="selectCategory">                            
-                        </select>
+                <div class="mainView">
+                    <div class="snapshot">
+                        <div class="row">
+                            <div class="col s3">
+                                <div class="card amber darken-3">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">$100,000</span>
+                                        <p>Net Worth</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="card amber darken-3">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">90%</span>
+                                        <p>Saving Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="card amber darken-3">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">$10,000</span>
+                                        <p>Income</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="card amber darken-3">
+                                    <div class="card-content white-text">
+                                        <span class="card-title">$1,000</span>
+                                        <p>Expenses</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col s2">
-                        <select class="browser-default" id="selectSubCategory">
-                            <option value="" disabled selected>Sub-Category</option>
-                        </select>
-                    </div>
-                    <div class="col s3"><input value="" placeholder="Expense Name" type="text"></div>
-                    <div class="col s2"><input value="" type="text" placeholder="Amount"></div>
-                    <div class="col s2"><input value="" placeholder="mm/yyyy Date" type="text"></div>
-                    <div class="col s1"><a id="" class="btn-floating btn-small waves-effect waves-light green accent-4"><i class="material-icons">add</i></a></div>
-                </div>
-            </div>
-            <h4 class="light">Edit Category</h4>
-            <div id="editCategory">
-                <div class="row">
-                    <div class="col s6">
-                        <input value="" name="addCateg" placeholder="Ex: Food" type="text">
-                        <label>Category</label>
-                    </div>
-                    <div class="col s5">
-                        <input value="" name="addSubCateg" type="text" placeholder="Ex: Eating Out">
-                        <label>Sub-Category</label>
-                    </div>
-                    <div class="col s1">
-                          <a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i class="material-icons">add</i></a>
-                    </div> 
-                </div>
-                <div id="editCategoryResult"></div>
-            </div>
 
-            <br><br><br><br><br><br><br><br>
+
+                    
+
+
+
+
+                    <h4 class="light">Cash Flow Summary</h4>
+                    <div align="center" id="spendingChart"></div>
+                    <h4 class="light">Spending Allocation</h4>
+                    <div align="center" id="allocationChart"></div>
+                    <h4 class="light">Record an Expense</h4>
+                    <div id="record">
+                        <div class="row">
+                            <div class="col s2">
+                                <select class="browser-default" id="selectCategory">                            
+                                </select>
+                            </div>
+                            <div class="col s2">
+                                <select class="browser-default" id="selectSubCategory">
+                                    <option value="" disabled selected>Sub-Category</option>
+                                </select>
+                            </div>
+                            <div class="col s3"><input value="" placeholder="Expense Name" type="text"></div>
+                            <div class="col s2"><input value="" type="text" placeholder="Amount"></div>
+                            <div class="col s2"><input value="" placeholder="mm/yyyy Date" type="text"></div>
+                            <div class="col s1"><a id="" class="btn-floating btn-small waves-effect waves-light green accent-4"><i class="material-icons">add</i></a></div>
+                        </div>
+                    </div>
+                    <h4 class="light">Edit Category</h4>
+                    <div id="editCategory">
+                        <div class="row">
+                            <div class="col s6">
+                                <input value="" name="addCateg" placeholder="Ex: Food" type="text">
+                                <label>Category</label>
+                            </div>
+                            <div class="col s5">
+                                <input value="" name="addSubCateg" type="text" placeholder="Ex: Eating Out">
+                                <label>Sub-Category</label>
+                            </div>
+                            <div class="col s1">
+                                  <a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i class="material-icons">add</i></a>
+                            </div> 
+                        </div>
+                        <div id="editCategoryResult"></div>
+                    </div>
+
+                    <br><br><br><br><br><br><br><br>
+                </div>
+            </div>
         </div>
     </div>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -110,40 +127,6 @@
     <script src="static/js/exporting.js"></script>
     <script type="text/javascript" src="static/js/materialize.js"></script>
     <script type="text/javascript" src="static/js/potts.js"></script>
-    <script type="text/javascript">
-        var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-        $(function() {
-            var userIdVal = -1;
-            function queryCategory() {
-                $.getJSON($SCRIPT_ROOT + '/queryCategory', {userId: userIdVal}, function(data) {
-                    listCategory(data);
-                    addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
-                    addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
-                });
-            };
-            function addCategoryButtonHandler() {
-                $.getJSON($SCRIPT_ROOT + '/addCategory', {userId: userIdVal, categ: $('input[name="addCateg"]').val(), sub: $('input[name="addSubCateg"]').val()}, function(data) {queryCategory();});
-            }
-            function delCaterogyButtonHandler() {
-                $.getJSON($SCRIPT_ROOT + '/delCategory', {userId: userIdVal, categ: "", sub:""}, function(data) {
-
-                });
-            }
-            function loginButtonHandler() {
-                $.getJSON($SCRIPT_ROOT + '/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
-                    userIdVal = data.result["userId"];
-                    loginHandler(data);
-                    queryCategory();
-                    globalizeUserID(userIdVal);
-                });
-            }
-            $("#loginButton").click(function() {loginButtonHandler();});
-            $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
-            bindEnterKey("input[name='usr']", loginButtonHandler);
-            bindEnterKey("input[name='pwd']", loginButtonHandler);
-            bindEnterKey("input[name='addCateg']", addCategoryButtonHandler);
-            bindEnterKey("input[name='addSubCateg']", addCategoryButtonHandler);
-        });
-    </script>
+    <script type="text/javascript">$(function() {Potts();});</script>
     </body>
 </html>
