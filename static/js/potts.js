@@ -4,9 +4,9 @@ var views = ["#cashFlowView", "#allocationView", "#editView"];
 function Potts() {
   $("#loginButton").click(function() {loginButtonHandler();});
   $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
-  $("#cashFlowView").click(function() {displayView("#cashFlowView");});
-  $("#allocationView").click(function() {displayView("#allocationView");});
-  $("#editView").click(function() {displayView("#editView");});
+  $("#cashFlowViewButton").click(function() {displayView("#cashFlowViewButton");});
+  $("#allocationViewButton").click(function() {displayView("#allocationViewButton");});
+  $("#editViewButton").click(function() {displayView("#editViewButton");});
   bindEnterKey("input[name='usr']", loginButtonHandler);
   bindEnterKey("input[name='pwd']", loginButtonHandler);
   bindEnterKey("input[name='addCateg']", addCategoryButtonHandler);
@@ -14,13 +14,16 @@ function Potts() {
 }
 
 function displayView(s) {
-  var n = 200;
+  console.log(s);
+  var n = 20;
+  var id = s.replace("Button", "");
   for(var i = 0; i < views.length; i++) {
-    if(s == views[i]) {
-      $(s).fadeIn(n);
+    if(id == views[i]) {
+      console.log(id);
+      $(views[i]).show();
     }
     else {
-      $(views[i]).fadeOut(n);
+      $(views[i]).hide();
     }
   }
 }
@@ -42,12 +45,8 @@ function loginButtonHandler() {
         userIdVal = data.result["userId"];
         loginHandler(data);
         queryCategory();
-        globalizeUserID(userIdVal);
+        $(".leftView").show();
     });
-}
-
-function globalizeUserID(n) {
-  userIdVal = n;
 }
 
 function loginHandler(data) {
@@ -126,7 +125,7 @@ function drawSpendingChart(spendingData) {
     total += spendingData[i];
   }
   total = "Total: $" + total.toFixed(2).toString();
-  $('#spendingChart').highcharts({
+  $('#cashFlowView').highcharts({
     chart: {type: 'column'},
     title: {text: total},
     xAxis: {categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], crosshair: true},
@@ -136,6 +135,7 @@ function drawSpendingChart(spendingData) {
     series: [{name: 'Spending', data: spendingData}],
     navigation: {buttonOptions: {enabled: false}}
   });
+  $("#cashFlowView").prepend('<h4 class="light">Spending Summary</h4>');
 }
 
 function setColorArray(color) {
@@ -165,7 +165,7 @@ function drawAllocationChart() {
   setColorArray("#00c96d");
   var dataArray = getCategoryArray();
   var options = {
-    chart: {renderTo: 'allocationChart', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
+    chart: {renderTo: 'allocationView', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
     title: {text: ""},
     tooltip: {pointFormat: '<b>{point.percentage:.1f}%</b>'},
     plotOptions: {
@@ -185,6 +185,7 @@ function drawAllocationChart() {
     navigation: {buttonOptions: {enabled: false}}
   };
   var chart = new Highcharts.Chart(options);
+  $("#allocationView").prepend('<h4 class="light">Spending Allocation</h4>');
 }
 
 

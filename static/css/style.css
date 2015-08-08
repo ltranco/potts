@@ -46,3 +46,11 @@ body {
 .rightView {
 	margin-left: 10%;
 }
+
+.leftView, #cashFlowView, #allocationView, #editView {
+	display: none;
+}
+
+#cashFlowView {
+	max-height: 500px;
+}
