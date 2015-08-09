@@ -4,6 +4,7 @@ var views = ["#cashFlowView", "#allocationView", "#editView"];
 function Potts() {
   $("#loginButton").click(function() {loginButtonHandler();});
   $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
+  $("#addExpenseButton").click(function() {addExpenseButtonHandler();});
   $("#cashFlowViewButton").click(function() {displayView("#cashFlowViewButton");});
   $("#allocationViewButton").click(function() {displayView("#allocationViewButton");});
   $("#editViewButton").click(function() {displayView("#editViewButton");});
@@ -11,15 +12,15 @@ function Potts() {
   bindEnterKey("input[name='pwd']", loginButtonHandler);
   bindEnterKey("input[name='addCateg']", addCategoryButtonHandler);
   bindEnterKey("input[name='addSubCateg']", addCategoryButtonHandler);
+  bindEnterKey("input[name='expenseName']", addExpenseButtonHandler);
+  bindEnterKey("input[name='expenseAmount']", addExpenseButtonHandler);
+  bindEnterKey("input[name='expenseDate']", addExpenseButtonHandler);
 }
 
 function displayView(s) {
-  console.log(s);
-  var n = 20;
   var id = s.replace("Button", "");
   for(var i = 0; i < views.length; i++) {
     if(id == views[i]) {
-      console.log(id);
       $(views[i]).show();
     }
     else {
@@ -29,15 +30,91 @@ function displayView(s) {
 }
 
 function queryCategory() {
-    $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
-        listCategory(data);
-        addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
-        addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
-    });
+  $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
+      listCategory(data);
+      addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
+      addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+  });
 };
 
+function confirmationAnimation(id, inputToClear) {
+  $(id).text("check");
+  window.setTimeout(function () {$(id).text("add");}, 500);
+  for(var i = 0; i < inputToClear.length; i++) {
+    $(inputToClear[i]).val("");  
+  }
+}
+
 function addCategoryButtonHandler() {
-    $.getJSON('/addCategory', {userId: userIdVal, categ: $('input[name="addCateg"]').val(), sub: $('input[name="addSubCateg"]').val()}, function(data) {queryCategory();});
+  var i1 = $('input[name="addCateg"]').val();
+  var i2 = $('input[name="addSubCateg"]').val();
+  if(i1 != "" && i2 != "") {
+    $.getJSON('/addCategory', {userId: userIdVal, categ: i1, sub: i2}, function(data) {
+      queryCategory();
+      confirmationAnimation("#addCategoryIcon", ["input[name='addCateg']", "input[name='addSubCateg']"]);
+    });  
+  }
+  else {
+    $("#addCategoryRow").effect("shake");
+  }
+}
+
+function queryExpenses() {
+  $.getJSON('/queryExpense', {userId: userIdVal}, function(data) {
+    var resultArray = data.result["result"];
+    $("#editExpenseResult").empty();
+    var removeButton = '<div class="col s1"><a class="removeExpense btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></div>';
+    for(var i = 0; i < resultArray.length; i++) {
+      $("#editExpenseResult").append( '<div class="row"><div class="eC col s2"><p>'  + resultArray[i][0] + '</p></div>' + 
+                                                        '<div class="eS col s2"><p>' + resultArray[i][1] + '</p></div>' +
+                                                        '<div class="eN col s3"><p>' + resultArray[i][2] + '</p></div>' +
+                                                        '<div class="eA col s2"><p>' + resultArray[i][3] + '</p></div>' +
+                                                        '<div class="eD col s2"><p>' + resultArray[i][4] + '</p></div>' +
+                                                        removeButton + '</div>');
+    }
+    $(".removeExpense").click(function() {
+      var o = $(this).parent().parent();
+      var c = o.find("div.eC p").text();
+      var s = o.find("div.eS p").text();
+      var n = o.find("div.eN p").text();
+      var a = o.find("div.eA p").text();
+      var d = o.find("div.eD p").text();
+      d = formatToDateTime(d);
+      $.getJSON('/delExpense', {userId: userIdVal, rCateg: c, rSubCateg: s, rName:n, eAmount:a, rDate:d}, function(data) {
+        if(data.result["status"] == "ok") {
+          o.remove();
+        }
+      });
+    });
+  });
+}
+
+function formatDate(d) {
+  var a = d.split("/");
+  return (a[2] + "-" + a[0] + "-" + a[1]);
+}
+
+function formatToDateTime(d) {
+  var a = d.split("/");
+  return (a[2] + "-" + a[1] + "-" + a[0]);
+}
+
+function addExpenseButtonHandler() {
+  var i1 = $('#selectCategory :selected').text();
+  var i2 = $('#selectSubCategory :selected').text();
+  var i3 = $('input[name="expenseName"]').val();
+  var i4 = $('input[name="expenseAmount"]').val();
+  var i5 = $('input[name="expenseDate"]').val();
+  if(i1 != "Category" && i2 != "Sub-Category" && i3 != "" && !isNaN(i4) && i5.match(/^(\d{2})\/(\d{2})\/(\d{4})$/) != null) {
+    i5 = formatDate(i5);
+    $.getJSON('/insertExpense', {userId:userIdVal, categ:i1, sub:i2, eName:i3, eAmount:i4, eDate:i5}, function(data) {
+      queryExpenses();
+      confirmationAnimation("#addExpenseIcon", ["input[name='expenseName']", "input[name='expenseAmount']", "input[name='expenseDate']"]);
+    });  
+  }
+  else {
+    $("#addExpenseRow").effect("shake");
+  }
 }
 
 function loginButtonHandler() {
@@ -45,7 +122,7 @@ function loginButtonHandler() {
         userIdVal = data.result["userId"];
         loginHandler(data);
         queryCategory();
-        $(".leftView").show();
+        queryExpenses();
     });
 }
 
@@ -53,6 +130,7 @@ function loginHandler(data) {
   if(data.result["status"] == "ok") {
     $(".login").fadeOut(200);
     $(".mainView").fadeIn(200);
+    $(".leftView").fadeIn(200);
     drawSpendingChart([233.07,27.66,102.03,318.69,329.13,159.33,131.87, 52.93, 0, 0, 0 ,0]);
   }
   else {

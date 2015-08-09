@@ -10,9 +10,9 @@
     <body>
         <div class="leftView">
             <ul id="navigationSideBar" class="side-nav fixed" style="width:170px;">
-                <li class="bold"><a id="cashFlowViewButton" class="waves-effect waves-teal"><i class="material-icons navItem">attach_money</i>CASH FLOW</a></li>
-                <li class="bold"><a id="allocationViewButton" class="waves-effect waves-teal"><i class="material-icons navItem">shopping_cart</i>ALLOCATION</a></li>
-                <li class="bold"><a id="editViewButton" class="waves-effect waves-teal"><i class="material-icons navItem">mode_edit</i>EDIT</a></li>
+                <li class="bold"><a id="cashFlowViewButton" class="waves-effect waves-orange lighten-1"><i class="material-icons navItem">attach_money</i>CASH FLOW</a></li>
+                <li class="bold"><a id="allocationViewButton" class="waves-effect waves-orange lighten-3"><i class="material-icons navItem">shopping_cart</i>ALLOCATION</a></li>
+                <li class="bold"><a id="editViewButton" class="waves-effect waves-green orange-5"><i class="material-icons navItem">mode_edit</i>EDIT</a></li>
             </ul>
         </div>
         <div class="rightView">
@@ -81,26 +81,8 @@
                     
                     
                     <div id="editView">
-                        <h4 class="light">Record an Expense</h4>
-                        <div id="record">
-                            <div class="row">
-                                <div class="col s2">
-                                    <select class="browser-default" id="selectCategory">                            
-                                    </select>
-                                </div>
-                                <div class="col s2">
-                                    <select class="browser-default" id="selectSubCategory">
-                                        <option value="" disabled selected>Sub-Category</option>
-                                    </select>
-                                </div>
-                                <div class="col s3"><input value="" placeholder="Expense Name" type="text"></div>
-                                <div class="col s2"><input value="" type="text" placeholder="Amount"></div>
-                                <div class="col s2"><input value="" placeholder="mm/yyyy Date" type="text"></div>
-                                <div class="col s1"><a id="" class="btn-floating btn-small waves-effect waves-light green accent-4"><i class="material-icons">add</i></a></div>
-                            </div>
-                        </div>
-                        <h4 class="light">Edit Category</h4>
-                        <div class="row">
+                        <h4 class="light">Add/Edit Category</h4>
+                        <div class="row" id="addCategoryRow">
                             <div class="col s6">
                                 <input value="" name="addCateg" placeholder="Ex: Food" type="text">
                                 <label>Category</label>
@@ -110,10 +92,29 @@
                                 <label>Sub-Category</label>
                             </div>
                             <div class="col s1">
-                                  <a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i class="material-icons">add</i></a>
+                                  <a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addCategoryIcon" class="material-icons">add</i></a>
                             </div> 
                         </div>
                         <div id="editCategoryResult"></div>
+                        <h4 class="light">Record an Expense</h4>
+                        <div id="record">
+                            <div class="row" id="addExpenseRow">
+                                <div class="col s2">
+                                    <select class="browser-default" id="selectCategory">                            
+                                    </select>
+                                </div>
+                                <div class="col s2">
+                                    <select class="browser-default" id="selectSubCategory">
+                                        <option value="" disabled selected>Sub-Category</option>
+                                    </select>
+                                </div>
+                                <div class="col s3"><input name="expenseName" value="" placeholder="Expense Name" type="text"></div>
+                                <div class="col s2"><input name="expenseAmount" value="" type="text" placeholder="Amount"></div>
+                                <div class="col s2"><input name="expenseDate" value="" placeholder="mm/dd/yyyy Date" type="text"></div>
+                                <div class="col s1"><a id="addExpenseButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addExpenseIcon" class="material-icons">add</i></a></div>
+                            </div>
+                        </div>
+                        <div id="editExpenseResult"></div>
                     </div>
 
                     <br><br><br><br><br><br><br><br>

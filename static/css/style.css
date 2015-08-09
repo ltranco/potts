@@ -51,6 +51,11 @@ body {
 	display: none;
 }
 
-#cashFlowView {
+#cashFlowView, #allocationView {
+	margin-top: 55px;
 	max-height: 500px;
+}
+
+#editView {
+	margin-top: 55px;
 }

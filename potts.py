@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 from flaskext.mysql import MySQL
+import sys
 
 app = Flask(__name__)
 app.debug = True
@@ -13,26 +14,22 @@ mysql.init_app(app)
 conn = mysql.connect()
 cursor = conn.cursor()
 
+def get_args(l):
+    return [int(request.args.get(p)) if p == "userId" else float(request.args.get(p)) if p == "eAmount" else request.args.get(p) for p in l]
+
 @app.route("/authenticate")
 def authenticate():
-    username = request.args.get('usr')
-    password = request.args.get('pwd')
-    cursor.execute("SELECT * from User where Username='" + username + "' and Password='" + password + "'")
-    data = cursor.fetchone()
-    if data is None:
-        print "failed"
-    	return jsonify(result={"status":"failed"})
-    else:
-        print data
-    	return jsonify(result={"status":"ok", "userId":data[0]})
+    try:
+        cursor.execute("SELECT * from User where Username=\'%s\' and Password=\'%s\'" % tuple(get_args(["usr", "pwd"])))
+        data = cursor.fetchone()
+        return jsonify(result={"status":"ok", "userId":data[0]})
+    except:
+    	return jsonify(result={"status":"failed"})    	
 
 @app.route("/addCategory")
-def addCategory():
+def add_category():
     try:
-        userId = request.args.get("userId")
-        category = request.args.get("categ")
-        sub = request.args.get("sub")
-        command = "INSERT INTO Category VALUES (%d, \'%s\', \'%s\')" % (int(userId), category, sub)
+        command = "INSERT INTO Category VALUES (%d, \'%s\', \'%s\')" % tuple(get_args(["userId", "categ", "sub"]))
         cursor.execute(command)
         conn.commit()
         return jsonify(result={"status":"ok"})
@@ -40,29 +37,55 @@ def addCategory():
         return jsonify(result={"status":"failed"})
 
 @app.route("/delCategory")
-def delCategory():
+def del_category():
     try:
-        userId = request.args.get("userId")
-        c = request.args.get("rCateg")
-        s = request.args.get("rSubCateg")
-        command = "DELETE FROM Category WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\'" % (int(userId), c, s)
-        print command
+        command = "DELETE FROM Category WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\'" % tuple(get_args(["userId", "rCateg", "rSubCateg"]))
         cursor.execute(command)
         conn.commit()
         return jsonify(result={"status":"ok"})
     except:
-        print "failed"
         return jsonify(result={"status":"failed"})
 
 @app.route("/queryCategory")
-def queryCategory():
-    userId = request.args.get("userId")
-    cursor.execute("SELECT category, subcategory from Category where userId=" + userId)
-    data = cursor.fetchall()
-    if data is None:
-        return jsonify(result={"status":"failed"})
-    else:
+def query_category():
+    try:
+        cursor.execute("SELECT category, subcategory from Category where userId=" + request.args.get("userId"))
+        data = cursor.fetchall()
         return jsonify(result={"status":"ok", "result":data})
+    except:
+        return jsonify(result={"status":"failed"})        
+
+@app.route("/insertExpense")
+def insert_expense():
+    try:
+        command = "INSERT INTO expenseRecord VALUES (%d, \'%s\', \'%s\', \'%s\', %f, \'%s\')" % tuple(get_args(["userId", "categ", "sub", "eName", "eAmount", "eDate"]))
+        cursor.execute(command)
+        conn.commit()
+        return jsonify(result={"status":"ok"})
+    except:
+        return jsonify(result={"status":"failed"})
+
+@app.route("/delExpense")
+def del_expense():
+    try:
+        command = "DELETE FROM expenseRecord WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\' and name=\'%s\' and amount=%f and date=str_to_date(\'%s\'" % tuple(get_args(["userId", "rCateg", "rSubCateg", "rName", "eAmount", "rDate"]))
+        command += ", '%" + "Y-%" + "d-%" + "m %" + "h:%" + "i:%" + "s')"
+        print command
+        cursor.execute(command)
+        conn.commit()
+        return jsonify(result={"status":"ok"})
+    except Exception as e:
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/queryExpense")
+def query_expense():
+    try:
+        cursor.execute("SELECT category, subcategory, name, amount, date_format(date, '%m/%d/%Y') from expenseRecord where userId=" + request.args.get("userId"))
+        data = cursor.fetchall()
+        return jsonify(result={"status":"ok", "result":data})
+    except:
+        return jsonify(result={"status":"failed"})        
 
 @app.route("/")
 def index():
