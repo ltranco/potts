@@ -87,6 +87,18 @@ def query_expense():
     except:
         return jsonify(result={"status":"failed"})        
 
+@app.route("/getMonthlyExpense")
+def get_monthly_expense():
+    try:
+        me = []
+        for i in range(1, 13):
+            cursor.execute("select sum(amount) from expenserecord where month(date)=%d" % i)
+            data = cursor.fetchall()[0][0]
+            if data is None: me.append(0.00)
+            else: me.append(round(data, 2))
+        return jsonify(result={"status":"ok", "meArray":me})
+    except:
+        return jsonify(result={"status":"failed"})
 @app.route("/")
 def index():
 	return render_template('index.html')

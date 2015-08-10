@@ -83,6 +83,7 @@ function queryExpenses() {
       $.getJSON('/delExpense', {userId: userIdVal, rCateg: c, rSubCateg: s, rName:n, eAmount:a, rDate:d}, function(data) {
         if(data.result["status"] == "ok") {
           o.remove();
+          calculateMonthlyExpenses();
         }
       });
     });
@@ -109,6 +110,7 @@ function addExpenseButtonHandler() {
     i5 = formatDate(i5);
     $.getJSON('/insertExpense', {userId:userIdVal, categ:i1, sub:i2, eName:i3, eAmount:i4, eDate:i5}, function(data) {
       queryExpenses();
+      calculateMonthlyExpenses();
       confirmationAnimation("#addExpenseIcon", ["input[name='expenseName']", "input[name='expenseAmount']", "input[name='expenseDate']"]);
     });  
   }
@@ -131,11 +133,17 @@ function loginHandler(data) {
     $(".login").fadeOut(200);
     $(".mainView").fadeIn(200);
     $(".leftView").fadeIn(200);
-    drawSpendingChart([233.07,27.66,102.03,318.69,329.13,159.33,131.87, 52.93, 0, 0, 0 ,0]);
+    calculateMonthlyExpenses();
   }
   else {
     $(".login").effect("shake");
   }
+}
+
+function calculateMonthlyExpenses() {
+  $.getJSON('/getMonthlyExpense', {userId:userIdVal}, function(data) {
+    drawSpendingChart(data.result["meArray"]);
+  });  
 }
 
 function addSelectOptions(source, selectID, type) {
@@ -208,7 +216,7 @@ function drawSpendingChart(spendingData) {
     title: {text: total},
     xAxis: {categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], crosshair: true},
     yAxis: {min: 0, title: {text: 'Amount ($)'}},
-    tooltip: {headerFormat: '<span style="font-size:10px">{point.key}</span><table>', pointFormat: '<td style="padding:0"><b>${point.y:.1f}</b></td></tr>', footerFormat: '</table>', shared: true, useHTML: true},
+    tooltip: {headerFormat: '<span style="font-size:10px">{point.key}</span><table>', pointFormat: '<td style="padding:0"><b>${point.y:.2f}</b></td></tr>', footerFormat: '</table>', shared: true, useHTML: true},
     plotOptions: {column: {color:'#00c96d', pointPadding: 0.2, borderWidth: 0}},
     series: [{name: 'Spending', data: spendingData}],
     navigation: {buttonOptions: {enabled: false}}
