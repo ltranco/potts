@@ -68,7 +68,7 @@ def insert_expense():
 @app.route("/delExpense")
 def del_expense():
     try:
-        command = "DELETE FROM expenseRecord WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\' and name=\'%s\' and amount=%f and date=str_to_date(\'%s\'" % tuple(get_args(["userId", "rCateg", "rSubCateg", "rName", "eAmount", "rDate"]))
+        command = "DELETE FROM expenseRecord WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\' and name=\'%s\' and amount<=(%f+0.00001) and date=str_to_date(\'%s\'" % tuple(get_args(["userId", "rCateg", "rSubCateg", "rName", "eAmount", "rDate"]))
         command += ", '%" + "Y-%" + "d-%" + "m %" + "h:%" + "i:%" + "s')"
         print command
         cursor.execute(command)
@@ -111,8 +111,7 @@ def get_allocation():
             print command
             cursor.execute(command)
             data = cursor.fetchall()[0][0]
-            if data is None: aArray.append(0.00)
-        else: aArray.append(round(data, 2))
+            if not data is None: aArray.append((c, round(data, 2)))
         print aArray
         return jsonify(result={"status":"ok", "aArray":aArray})
     except Exception as e:

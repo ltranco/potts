@@ -17,6 +17,94 @@ function Potts() {
   bindEnterKey("input[name='expenseDate']", addExpenseButtonHandler);
 }
 
+function loginButtonHandler() {
+  $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
+      userIdVal = data.result["userId"];
+      loginHandler(data);
+      queryCategory();
+      queryExpenses();
+  });
+}
+
+function loginHandler(data) {
+  if(data.result["status"] == "ok") {
+    $(".login").fadeOut(200);
+    $(".mainView").fadeIn(200);
+    $(".leftView").fadeIn(200);
+    calculateMonthlyExpenses();
+  }
+  else {
+    $(".login").effect("shake");
+  }
+}
+
+function calculateMonthlyExpenses() {
+  $.getJSON('/getMonthlyExpense', {userId:userIdVal}, function(data) {
+    drawSpendingChart(data.result["meArray"]);
+  });  
+}
+
+function calculateAllocation() {
+  $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
+      var resultArray = data.result["result"];
+      var categList = [];
+      var d = {};
+
+      for(var i in resultArray) {
+        var el = resultArray[i][0];
+        if(!(el in d)) {
+          categList.push(el);
+          d[el] = "";
+        }
+      }
+
+      $.getJSON('/getAllocation', {userId:userIdVal, cArray:JSON.stringify(categList)}, function(data) {
+        var categArray = getCategoryArray(data.result["aArray"]);
+        drawAllocationChart(categArray);
+      });
+  });
+}
+
+function listCategory(data) {
+  var resultArray = data.result["result"];
+  $("#editCategoryResult").empty();
+  var removeButton = '<div class="col s1"><a class="removeCateg btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></div>';
+  for(var i = 0; i < resultArray.length; i++) {
+    $("#editCategoryResult").append('<div class="row"><div class="col s6 selectCategory"><p>' + resultArray[i][0] + '</p></div><div class="col s5 selectSubCategory"><p>' 
+                                                        + resultArray[i][1] + '</p></div>'
+                                                        + removeButton + '</div>');
+  }
+  calculateAllocation();
+  $(".removeCateg").click(function() {
+    var o = $(this).parent().parent();
+    var c = o.find("div.selectCategory p").text();
+    var s = o.find("div.selectSubCategory p").text();
+
+    $.getJSON('/delCategory', {userId: userIdVal, rCateg: c, rSubCateg: s}, function(data) {
+      if(data.result["status"] == "ok") {
+        o.remove();
+        removeSelectOptions(c, "#selectCategory option");
+        removeSelectOptions(s, "#selectSubCategory option");
+        addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
+        addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+        queryCategory();
+      }
+    });
+  });
+}
+
+
+
+
+
+function queryCategory() {
+  $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
+      listCategory(data);
+      addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
+      addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+  });
+};
+
 function displayView(s) {
   var id = s.replace("Button", "");
   for(var i = 0; i < views.length; i++) {
@@ -28,14 +116,6 @@ function displayView(s) {
     }
   }
 }
-
-function queryCategory() {
-  $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
-      listCategory(data);
-      addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
-      addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
-  });
-};
 
 function confirmationAnimation(id, inputToClear) {
   $(id).text("check");
@@ -111,59 +191,13 @@ function addExpenseButtonHandler() {
     $.getJSON('/insertExpense', {userId:userIdVal, categ:i1, sub:i2, eName:i3, eAmount:i4, eDate:i5}, function(data) {
       queryExpenses();
       calculateMonthlyExpenses();
+      calculateAllocation();
       confirmationAnimation("#addExpenseIcon", ["input[name='expenseName']", "input[name='expenseAmount']", "input[name='expenseDate']"]);
     });  
   }
   else {
     $("#addExpenseRow").effect("shake");
   }
-}
-
-function loginButtonHandler() {
-    $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
-        userIdVal = data.result["userId"];
-        loginHandler(data);
-        queryCategory();
-        queryExpenses();
-    });
-}
-
-function loginHandler(data) {
-  if(data.result["status"] == "ok") {
-    $(".login").fadeOut(200);
-    $(".mainView").fadeIn(200);
-    $(".leftView").fadeIn(200);
-    calculateMonthlyExpenses();
-  }
-  else {
-    $(".login").effect("shake");
-  }
-}
-
-function calculateMonthlyExpenses() {
-  $.getJSON('/getMonthlyExpense', {userId:userIdVal}, function(data) {
-    drawSpendingChart(data.result["meArray"]);
-  });  
-}
-
-function calculateAllocation(array) {
-  var categList = [];
-  for(var k in uniqueDictFromArray(array[0])) {
-    categList.push(k);
-  }
-  $.getJSON('/getAllocation', {userId:userIdVal, cArray:JSON.stringify(categList)}, function(data) {
-    console.log(data.result["aArray"]);
-  });
-}
-
-function uniqueDictFromArray(array) {
-  var d = {};
-  for(var i in array) {
-    if(!(array[i] in d)) {
-      d[array[i]] = "";
-    }
-  }
-  return d;
 }
 
 function addSelectOptions(source, selectID, type) {
@@ -189,34 +223,7 @@ function removeSelectOptions(check, selectID) {
   }
 }
 
-function listCategory(data) {
-  var resultArray = data.result["result"];
-  $("#editCategoryResult").empty();
-  var removeButton = '<div class="col s1"><a class="removeCateg btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></div>';
-  for(var i = 0; i < resultArray.length; i++) {
-    $("#editCategoryResult").append('<div class="row"><div class="col s6 selectCategory"><p>' + resultArray[i][0] + '</p></div><div class="col s5 selectSubCategory"><p>' 
-                                                        + resultArray[i][1] + '</p></div>'
-                                                        + removeButton + '</div>');
-  }
-  calculateAllocation(resultArray);
-  drawAllocationChart();
-  $(".removeCateg").click(function() {
-    var o = $(this).parent().parent();
-    var c = o.find("div.selectCategory p").text();
-    var s = o.find("div.selectSubCategory p").text();
 
-    $.getJSON('/delCategory', {userId: userIdVal, rCateg: c, rSubCateg: s}, function(data) {
-      if(data.result["status"] == "ok") {
-        o.remove();
-        removeSelectOptions(c, "#selectCategory option");
-        removeSelectOptions(s, "#selectSubCategory option");
-        addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
-        addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
-        drawAllocationChart();
-      }
-    });
-  });
-}
 
 function bindEnterKey(query, functionName) {
   $(query).bind('keydown', function(e) {
@@ -255,7 +262,13 @@ function setColorArray(color) {
     }());
 }
 
-function getCategoryArray() {
+function getCategoryArray(data) {
+  var d = [];
+  for(var i in data) {
+    d.push({name:data[i][0], y:data[i][1]});
+  }
+  return d;
+  /*
   var data = [];
   var d = {};
   var array = $("div.selectCategory p");
@@ -264,13 +277,12 @@ function getCategoryArray() {
       data.push({name:array[i].textContent, y: 56.33});
       d[array[i].textContent] = "";  
     }
-  }
-  return data;
+  }*/
 }
 
-function drawAllocationChart() {
+function drawAllocationChart(data) {
   setColorArray("#00c96d");
-  var dataArray = getCategoryArray();
+  var dataArray = data;
   var options = {
     chart: {renderTo: 'allocationView', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
     title: {text: ""},
