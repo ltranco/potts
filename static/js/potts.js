@@ -146,6 +146,26 @@ function calculateMonthlyExpenses() {
   });  
 }
 
+function calculateAllocation(array) {
+  var categList = [];
+  for(var k in uniqueDictFromArray(array[0])) {
+    categList.push(k);
+  }
+  $.getJSON('/getAllocation', {userId:userIdVal, cArray:JSON.stringify(categList)}, function(data) {
+    console.log(data.result["aArray"]);
+  });
+}
+
+function uniqueDictFromArray(array) {
+  var d = {};
+  for(var i in array) {
+    if(!(array[i] in d)) {
+      d[array[i]] = "";
+    }
+  }
+  return d;
+}
+
 function addSelectOptions(source, selectID, type) {
   var array = $(source);
   var d = {};
@@ -178,6 +198,7 @@ function listCategory(data) {
                                                         + resultArray[i][1] + '</p></div>'
                                                         + removeButton + '</div>');
   }
+  calculateAllocation(resultArray);
   drawAllocationChart();
   $(".removeCateg").click(function() {
     var o = $(this).parent().parent();

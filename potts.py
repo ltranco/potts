@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, json
 from flaskext.mysql import MySQL
 import sys
 
@@ -81,10 +81,11 @@ def del_expense():
 @app.route("/queryExpense")
 def query_expense():
     try:
-        cursor.execute("SELECT category, subcategory, name, amount, date_format(date, '%m/%d/%Y') from expenseRecord where userId=" + request.args.get("userId"))
+        cursor.execute("SELECT category, subcategory, name, amount, date_format(date, '%m/%d/%Y') from expenseRecord where " + ("userId=%d" % int(request.args.get("userId"))))
         data = cursor.fetchall()
         return jsonify(result={"status":"ok", "result":data})
-    except:
+    except Exception as e:
+        print e
         return jsonify(result={"status":"failed"})        
 
 @app.route("/getMonthlyExpense")
@@ -92,13 +93,32 @@ def get_monthly_expense():
     try:
         me = []
         for i in range(1, 13):
-            cursor.execute("select sum(amount) from expenserecord where month(date)=%d" % i)
+            command = "select sum(amount) from expenserecord where userId=%d and month(date)=%d" % (int(request.args.get("userId")), i)
+            cursor.execute(command)
             data = cursor.fetchall()[0][0]
             if data is None: me.append(0.00)
             else: me.append(round(data, 2))
         return jsonify(result={"status":"ok", "meArray":me})
-    except:
+    except Exception as e:
         return jsonify(result={"status":"failed"})
+
+@app.route("/getAllocation")
+def get_allocation():
+    try:
+        cArray, aArray, userId = json.loads(request.args.get("cArray")), [], int(request.args.get("userId"))
+        for c in cArray:
+            command = "select sum(amount) from expenseRecord where userId=%d and category=\'%s\'" % (userId, c)
+            print command
+            cursor.execute(command)
+            data = cursor.fetchall()[0][0]
+            if data is None: aArray.append(0.00)
+        else: aArray.append(round(data, 2))
+        print aArray
+        return jsonify(result={"status":"ok", "aArray":aArray})
+    except Exception as e:
+        print e
+        return jsonify(result={"status":"failed"})
+
 @app.route("/")
 def index():
 	return render_template('index.html')
