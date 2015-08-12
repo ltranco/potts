@@ -1,10 +1,12 @@
 var userIdVal = -1;
 var views = ["#cashFlowView", "#allocationView", "#editView"];
+var netFields = ["cash", "investments", "property", "retirement", "loan", "debt", "morgages"];
 
 function Potts() {
   $("#loginButton").click(function() {loginButtonHandler();});
   $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
   $("#addExpenseButton").click(function() {addExpenseButtonHandler();});
+  $("#editNetButton").click(function() {editNetButtonHandler();});
   $("#cashFlowViewButton").click(function() {displayView("#cashFlowViewButton");});
   $("#allocationViewButton").click(function() {displayView("#allocationViewButton");});
   $("#editViewButton").click(function() {displayView("#editViewButton");});
@@ -17,12 +19,43 @@ function Potts() {
   bindEnterKey("input[name='expenseDate']", addExpenseButtonHandler);
 }
 
+function queryNet() {
+  $.getJSON('/queryNet', {userId:userIdVal}, function(data) {
+    var vals = data.result["vals"];
+    console.log(vals);
+    for(var i in netFields) {
+      console.log("input[name='" + netFields[i] + "']");
+      $("input[name='" + netFields[i] + "']").val(vals[i]);
+    }
+    editNetButtonHandler();
+  });
+}
+
+function editNetButtonHandler() {
+  var assetArray = {"cash":$("input[name='cash']").val(), "investments":$("input[name='investments']").val(), "property":$("input[name='property']").val(), "retirement":$("input[name='retirement']").val()};
+  var liabilityArray = {"loan":$("input[name='loan']").val(), "debt":$("input[name='debt']").val(), "morgages":$("input[name='morgages']").val()};
+  $.getJSON('/editNet', {userId:userIdVal, asset:JSON.stringify(assetArray), liability:JSON.stringify(liabilityArray)}, function(data) {
+    if(data.result["status"] == "ok") {
+      var aSum = 0.0;
+      var lSum = 0.0;
+      for(var k in assetArray) {
+        aSum += parseFloat(assetArray[k]);
+      }
+      for(var k in liabilityArray) {
+        lSum += parseFloat(liabilityArray[k]);
+      }
+      $("#netCard").text("$ " + numberWithCommas(aSum - lSum));
+    }
+  });
+}
+
 function loginButtonHandler() {
   $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
       userIdVal = data.result["userId"];
       loginHandler(data);
       queryCategory();
       queryExpenses();
+      queryNet();
   });
 }
 
@@ -40,7 +73,13 @@ function loginHandler(data) {
 
 function calculateMonthlyExpenses() {
   $.getJSON('/getMonthlyExpense', {userId:userIdVal}, function(data) {
-    drawSpendingChart(data.result["meArray"]);
+    var sum = 0.0;
+    var meArray = data.result["meArray"];
+    for(var i in meArray) {
+      sum += meArray[i];
+    }
+    $("#expenseCard").text("$ " + numberWithCommas(sum));
+    drawSpendingChart(meArray);
   });  
 }
 
@@ -289,4 +328,8 @@ function bindEnterKey(query, functionName) {
           functionName();
         }
   });
+}
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }

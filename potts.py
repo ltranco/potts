@@ -108,12 +108,39 @@ def get_allocation():
         cArray, aArray, userId = json.loads(request.args.get("cArray")), [], int(request.args.get("userId"))
         for c in cArray:
             command = "select sum(amount) from expenseRecord where userId=%d and category=\'%s\'" % (userId, c)
-            print command
             cursor.execute(command)
             data = cursor.fetchall()[0][0]
             if not data is None: aArray.append((c, round(data, 2)))
-        print aArray
         return jsonify(result={"status":"ok", "aArray":aArray})
+    except Exception as e:
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/editNet")
+def edit_net():
+    try:
+        userId, a, l = int(request.args.get("userId")), json.loads(request.args.get("asset")), json.loads(request.args.get("liability"))
+        d = dict(a.items() + l.items())
+        command, info = "update net set ", ""
+        for k in d:
+            info += k + "=" + (str(float(d[k])) if d[k] != "" else "0.0") + " "
+        command += ",".join(info.strip().split())
+        command += " where userId=%d" % userId
+        cursor.execute(command)
+        conn.commit()
+        return jsonify(result={"status":"ok"})
+    except Exception as e:
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/queryNet")
+def query_net():
+    try:
+        userId = int(request.args.get("userId"))
+        command = "select cash, investments, property, retirement, loan, debt, morgages from net where userId=%d" % userId
+        cursor.execute(command)
+        data = cursor.fetchall()
+        return jsonify(result={"status":"ok", "vals":list(data[0])})
     except Exception as e:
         print e
         return jsonify(result={"status":"failed"})
