@@ -44,26 +44,32 @@ function calculateMonthlyExpenses() {
   });  
 }
 
-function calculateAllocation() {
-  $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
-      var resultArray = data.result["result"];
-      var categList = [];
-      var d = {};
-
-      for(var i in resultArray) {
-        var el = resultArray[i][0];
-        if(!(el in d)) {
-          categList.push(el);
-          d[el] = "";
-        }
-      }
-
-      $.getJSON('/getAllocation', {userId:userIdVal, cArray:JSON.stringify(categList)}, function(data) {
-        var categArray = getCategoryArray(data.result["aArray"]);
-        drawAllocationChart(categArray);
-      });
+function drawSpendingChart(spendingData) {
+  var total = 0.0;
+  for(var i = 0; i < spendingData.length; i++) {
+    total += spendingData[i];
+  }
+  total = "Total: $" + total.toFixed(2).toString();
+  $('#cashFlowView').highcharts({
+    chart: {type: 'column'},
+    title: {text: total},
+    xAxis: {categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], crosshair: true},
+    yAxis: {min: 0, title: {text: 'Amount ($)'}},
+    tooltip: {headerFormat: '<span style="font-size:10px">{point.key}</span><table>', pointFormat: '<td style="padding:0"><b>${point.y:.2f}</b></td></tr>', footerFormat: '</table>', shared: true, useHTML: true},
+    plotOptions: {column: {color:'#00c96d', pointPadding: 0.2, borderWidth: 0}},
+    series: [{name: 'Spending', data: spendingData}],
+    navigation: {buttonOptions: {enabled: false}}
   });
+  $("#cashFlowView").prepend('<h4 class="light">Spending Summary</h4>');
 }
+
+function queryCategory() {
+  $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
+      listCategory(data);
+      addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
+      addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+  });
+};
 
 function listCategory(data) {
   var resultArray = data.result["result"];
@@ -93,50 +99,93 @@ function listCategory(data) {
   });
 }
 
+function addSelectOptions(source, selectID, type) {
+  var array = $(source);
+  var d = {};
+  for(var i = 0; i < array.length; i++) {
+    if(!(array[i].textContent in d)) {
+      d[array[i].textContent] = "";
+    }
+  }
+  $(selectID).empty().append('<option value="" disabled selected>' + type + '</option>');
+  for(var k in d) {
+    $(selectID).append('<option value="">' + k + '</option>');  
+  }
+}
 
+function removeSelectOptions(check, selectID) {
+  var array = $(selectID);
+  for(var i = 0; i < array.length; i++) {
+    if(array[i].textContent == check) {
+      array[i].remove();
+    }
+  }
+}
 
-
-
-function queryCategory() {
+function calculateAllocation() {
   $.getJSON('/queryCategory', {userId: userIdVal}, function(data) {
-      listCategory(data);
-      addSelectOptions("div.selectCategory p", "#selectCategory", "Category");
-      addSelectOptions("div.selectSubCategory p", "#selectSubCategory", "Sub-Category");
+      var resultArray = data.result["result"];
+      var categList = [];
+      var d = {};
+
+      for(var i in resultArray) {
+        var el = resultArray[i][0];
+        if(!(el in d)) {
+          categList.push(el);
+          d[el] = "";
+        }
+      }
+
+      $.getJSON('/getAllocation', {userId:userIdVal, cArray:JSON.stringify(categList)}, function(data) {
+        var categArray = getCategoryArray(data.result["aArray"]);
+        drawAllocationChart(categArray);
+      });
   });
-};
-
-function displayView(s) {
-  var id = s.replace("Button", "");
-  for(var i = 0; i < views.length; i++) {
-    if(id == views[i]) {
-      $(views[i]).show();
-    }
-    else {
-      $(views[i]).hide();
-    }
-  }
 }
 
-function confirmationAnimation(id, inputToClear) {
-  $(id).text("check");
-  window.setTimeout(function () {$(id).text("add");}, 500);
-  for(var i = 0; i < inputToClear.length; i++) {
-    $(inputToClear[i]).val("");  
+function getCategoryArray(data) {
+  var d = [];
+  for(var i in data) {
+    d.push({name:data[i][0], y:data[i][1]});
   }
+  return d;
 }
 
-function addCategoryButtonHandler() {
-  var i1 = $('input[name="addCateg"]').val();
-  var i2 = $('input[name="addSubCateg"]').val();
-  if(i1 != "" && i2 != "") {
-    $.getJSON('/addCategory', {userId: userIdVal, categ: i1, sub: i2}, function(data) {
-      queryCategory();
-      confirmationAnimation("#addCategoryIcon", ["input[name='addCateg']", "input[name='addSubCateg']"]);
-    });  
-  }
-  else {
-    $("#addCategoryRow").effect("shake");
-  }
+function drawAllocationChart(data) {
+  setColorArray("#00c96d");
+  var dataArray = data;
+  var options = {
+    chart: {renderTo: 'allocationView', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
+    title: {text: ""},
+    tooltip: {pointFormat: '<b>{point.percentage:.1f}%</b>'},
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: false
+            },
+            showInLegend: true
+        }
+    },
+    series: [{
+        colorByPoint: true,
+        data: dataArray
+    }],
+    navigation: {buttonOptions: {enabled: false}}
+  };
+  var chart = new Highcharts.Chart(options);
+  $("#allocationView").prepend('<h4 class="light">Spending Allocation</h4>');
+}
+
+function setColorArray(color) {
+  Highcharts.getOptions().plotOptions.pie.colors = (function () {
+    var colors = [], base = color, i;
+    for (i = 0; i < 10; i += 1) {
+        colors.push(Highcharts.Color(base).brighten((i - 1) / 7).get());
+    }
+    return colors;
+  }());
 }
 
 function queryExpenses() {
@@ -170,14 +219,31 @@ function queryExpenses() {
   });
 }
 
-function formatDate(d) {
-  var a = d.split("/");
-  return (a[2] + "-" + a[0] + "-" + a[1]);
-}
-
 function formatToDateTime(d) {
   var a = d.split("/");
   return (a[2] + "-" + a[1] + "-" + a[0]);
+}
+
+function addCategoryButtonHandler() {
+  var i1 = $('input[name="addCateg"]').val();
+  var i2 = $('input[name="addSubCateg"]').val();
+  if(i1 != "" && i2 != "") {
+    $.getJSON('/addCategory', {userId: userIdVal, categ: i1, sub: i2}, function(data) {
+      queryCategory();
+      confirmationAnimation("#addCategoryIcon", ["input[name='addCateg']", "input[name='addSubCateg']"]);
+    });  
+  }
+  else {
+    $("#addCategoryRow").effect("shake");
+  }
+}
+
+function confirmationAnimation(id, inputToClear) {
+  $(id).text("check");
+  window.setTimeout(function () {$(id).text("add");}, 500);
+  for(var i = 0; i < inputToClear.length; i++) {
+    $(inputToClear[i]).val("");  
+  }
 }
 
 function addExpenseButtonHandler() {
@@ -200,30 +266,22 @@ function addExpenseButtonHandler() {
   }
 }
 
-function addSelectOptions(source, selectID, type) {
-  var array = $(source);
-  var d = {};
-  for(var i = 0; i < array.length; i++) {
-    if(!(array[i].textContent in d)) {
-      d[array[i].textContent] = "";
-    }
-  }
-  $(selectID).empty().append('<option value="" disabled selected>' + type + '</option>');
-  for(var k in d) {
-    $(selectID).append('<option value="">' + k + '</option>');  
-  }
+function formatDate(d) {
+  var a = d.split("/");
+  return (a[2] + "-" + a[0] + "-" + a[1]);
 }
 
-function removeSelectOptions(check, selectID) {
-  var array = $(selectID);
-  for(var i = 0; i < array.length; i++) {
-    if(array[i].textContent == check) {
-      array[i].remove();
+function displayView(s) {
+  var id = s.replace("Button", "");
+  for(var i = 0; i < views.length; i++) {
+    if(id == views[i]) {
+      $(views[i]).show();
+    }
+    else {
+      $(views[i]).hide();
     }
   }
 }
-
-
 
 function bindEnterKey(query, functionName) {
   $(query).bind('keydown', function(e) {
@@ -232,79 +290,3 @@ function bindEnterKey(query, functionName) {
         }
   });
 }
-
-function drawSpendingChart(spendingData) {
-  var total = 0.0;
-  for(var i = 0; i < spendingData.length; i++) {
-    total += spendingData[i];
-  }
-  total = "Total: $" + total.toFixed(2).toString();
-  $('#cashFlowView').highcharts({
-    chart: {type: 'column'},
-    title: {text: total},
-    xAxis: {categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], crosshair: true},
-    yAxis: {min: 0, title: {text: 'Amount ($)'}},
-    tooltip: {headerFormat: '<span style="font-size:10px">{point.key}</span><table>', pointFormat: '<td style="padding:0"><b>${point.y:.2f}</b></td></tr>', footerFormat: '</table>', shared: true, useHTML: true},
-    plotOptions: {column: {color:'#00c96d', pointPadding: 0.2, borderWidth: 0}},
-    series: [{name: 'Spending', data: spendingData}],
-    navigation: {buttonOptions: {enabled: false}}
-  });
-  $("#cashFlowView").prepend('<h4 class="light">Spending Summary</h4>');
-}
-
-function setColorArray(color) {
-  Highcharts.getOptions().plotOptions.pie.colors = (function () {
-        var colors = [], base = color, i;
-        for (i = 0; i < 10; i += 1) {
-            colors.push(Highcharts.Color(base).brighten((i - 1) / 7).get());
-        }
-        return colors;
-    }());
-}
-
-function getCategoryArray(data) {
-  var d = [];
-  for(var i in data) {
-    d.push({name:data[i][0], y:data[i][1]});
-  }
-  return d;
-  /*
-  var data = [];
-  var d = {};
-  var array = $("div.selectCategory p");
-  for(var i = 0; i < array.length; i++) {
-    if(!(array[i].textContent in d)) {
-      data.push({name:array[i].textContent, y: 56.33});
-      d[array[i].textContent] = "";  
-    }
-  }*/
-}
-
-function drawAllocationChart(data) {
-  setColorArray("#00c96d");
-  var dataArray = data;
-  var options = {
-    chart: {renderTo: 'allocationView', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
-    title: {text: ""},
-    tooltip: {pointFormat: '<b>{point.percentage:.1f}%</b>'},
-    plotOptions: {
-        pie: {
-            allowPointSelect: true,
-            cursor: 'pointer',
-            dataLabels: {
-                enabled: false
-            },
-            showInLegend: true
-        }
-    },
-    series: [{
-        colorByPoint: true,
-        data: dataArray
-    }],
-    navigation: {buttonOptions: {enabled: false}}
-  };
-  var chart = new Highcharts.Chart(options);
-  $("#allocationView").prepend('<h4 class="light">Spending Allocation</h4>');
-}
-
-
