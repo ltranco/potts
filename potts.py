@@ -15,7 +15,7 @@ conn = mysql.connect()
 cursor = conn.cursor()
 
 def get_args(l):
-    return [int(request.args.get(p)) if p == "userId" else float(request.args.get(p)) if p == "eAmount" else request.args.get(p) for p in l]
+    return [int(request.args.get(p)) if p == "userId" else round(float(request.args.get(p)), 2) if p == "eAmount" else request.args.get(p) for p in l]
 
 @app.route("/authenticate")
 def authenticate():
@@ -49,7 +49,7 @@ def del_category():
 @app.route("/queryCategory")
 def query_category():
     try:
-        cursor.execute("SELECT category, subcategory from Category where userId=" + request.args.get("userId"))
+        cursor.execute("SELECT category, subcategory from Category where category<>'income' and userId=" + request.args.get("userId"))
         data = cursor.fetchall()
         return jsonify(result={"status":"ok", "result":data})
     except:
@@ -60,30 +60,42 @@ def insert_expense():
     try:
         command = "INSERT INTO expenseRecord VALUES (%d, \'%s\', \'%s\', \'%s\', %f, \'%s\')" % tuple(get_args(["userId", "categ", "sub", "eName", "eAmount", "eDate"]))
         cursor.execute(command)
-        conn.commit()
-        return jsonify(result={"status":"ok"})
-    except:
-        return jsonify(result={"status":"failed"})
-
-@app.route("/delExpense")
-def del_expense():
-    try:
-        command = "DELETE FROM expenseRecord WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\' and name=\'%s\' and amount<=(%f+0.00001) and date=str_to_date(\'%s\'" % tuple(get_args(["userId", "rCateg", "rSubCateg", "rName", "eAmount", "rDate"]))
-        command += ", '%" + "Y-%" + "d-%" + "m %" + "h:%" + "i:%" + "s')"
         print command
-        cursor.execute(command)
         conn.commit()
         return jsonify(result={"status":"ok"})
     except Exception as e:
         print e
         return jsonify(result={"status":"failed"})
 
+@app.route("/delExpense")
+def del_expense():
+    try:
+        command = "DELETE FROM expenseRecord WHERE userId=%d AND category=\'%s\' AND subcategory=\'%s\' and name=\'%s\' and amount<=%f and date=str_to_date(\'%s\'" % tuple(get_args(["userId", "rCateg", "rSubCateg", "rName", "eAmount", "rDate"]))
+        command += ", '%" + "Y-%" + "d-%" + "m %" + "h:%" + "i:%" + "s')"
+        print command
+        cursor.execute(command)
+        conn.commit()
+        return jsonify(result={"status":"ok"})
+    except Exception as e:
+        print "here"
+        print e
+        return jsonify(result={"status":"failed"})
+
 @app.route("/queryExpense")
 def query_expense():
     try:
-        cursor.execute("SELECT category, subcategory, name, amount, date_format(date, '%m/%d/%Y') from expenseRecord where " + ("userId=%d" % int(request.args.get("userId"))))
-        data = cursor.fetchall()
-        return jsonify(result={"status":"ok", "result":data})
+        command = "SELECT category, subcategory, name, amount, date_format(date, '%m/%d/%Y') from expenseRecord where " + ("userId=%d" % int(request.args.get("userId")))
+        print command
+        cursor.execute(command)
+        data, result = cursor.fetchall(), []
+        print data
+        for l in data:
+            m = []
+            for x in l:
+                try: m.append(round(float(x), 2))
+                except: m.append(x)
+            result.append(m)
+        return jsonify(result={"status":"ok", "result":result})
     except Exception as e:
         print e
         return jsonify(result={"status":"failed"})        
@@ -93,7 +105,7 @@ def get_monthly_expense():
     try:
         me = []
         for i in range(1, 13):
-            command = "select sum(amount) from expenserecord where userId=%d and month(date)=%d" % (int(request.args.get("userId")), i)
+            command = "select sum(amount) from expenserecord where category<>'income' and userId=%d and month(date)=%d" % (int(request.args.get("userId")), i)
             cursor.execute(command)
             data = cursor.fetchall()[0][0]
             if data is None: me.append(0.00)
@@ -141,6 +153,18 @@ def query_net():
         cursor.execute(command)
         data = cursor.fetchall()
         return jsonify(result={"status":"ok", "vals":list(data[0])})
+    except Exception as e:
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/queryIncome")
+def query_income():
+    try:
+        userId = int(request.args.get("userId"))
+        command = "select sum(amount) from expenserecord where category='Income' and userId=%d" % userId
+        cursor.execute(command)
+        data = cursor.fetchall()
+        return jsonify(result={"status":"ok", "income":round(float(data[0][0]), 2)})
     except Exception as e:
         print e
         return jsonify(result={"status":"failed"})

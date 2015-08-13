@@ -3,7 +3,7 @@
 
     <meta name="author" content="Long Tran">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+    <link rel="icon" type="image/png" href="static/favicon.png">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
     <link rel="stylesheet" type="text/css" href="static/css/materialize.min.css" media="screen,projection"/>
@@ -46,7 +46,7 @@
                             <div class="col s3">
                                 <div class="card amber darken-3">
                                     <div class="card-content white-text">
-                                        <span class="card-title">90%</span>
+                                        <span class="card-title" id="savingCard"></span>
                                         <p>Saving Rate</p>
                                     </div>
                                 </div>
@@ -54,7 +54,7 @@
                             <div class="col s3">
                                 <div class="card amber darken-3">
                                     <div class="card-content white-text">
-                                        <span class="card-title">$10,000</span>
+                                        <span class="card-title" id="incomeCard"></span>
                                         <p>Income</p>
                                     </div>
                                 </div>
@@ -125,7 +125,7 @@
                                 <tr><td>Loan</td><td><input value="" name="loan" type="text"></td></tr>
                                 <tr><td>Debt</td><td><input value="" name="debt" type="text"></td></tr>
                                 <tr><td>Mortgages</td><td><input value="" name="morgages" type="text"></td></tr>
-                                <tr><td></td><td><a class="waves-effect waves-light btn" id="editNetButton"><i class="material-icons">save</i>Save</a></td></tr>
+                                <tr><td></td><td><a class="waves-effect waves-light btn" id="editNetButton"><i class="material-icons navItem">save</i></a></td></tr>
                             </table>
                         </div>
                     </div>

@@ -22,9 +22,7 @@ function Potts() {
 function queryNet() {
   $.getJSON('/queryNet', {userId:userIdVal}, function(data) {
     var vals = data.result["vals"];
-    console.log(vals);
     for(var i in netFields) {
-      console.log("input[name='" + netFields[i] + "']");
       $("input[name='" + netFields[i] + "']").val(vals[i]);
     }
     editNetButtonHandler();
@@ -44,7 +42,7 @@ function editNetButtonHandler() {
       for(var k in liabilityArray) {
         lSum += parseFloat(liabilityArray[k]);
       }
-      $("#netCard").text("$ " + numberWithCommas(aSum - lSum));
+      $("#netCard").text("$ " + numberWithCommas((aSum - lSum).toFixed(2)));
     }
   });
 }
@@ -56,6 +54,24 @@ function loginButtonHandler() {
       queryCategory();
       queryExpenses();
       queryNet();
+      queryIncome();
+  });
+}
+
+function querySavingRate() {
+  var e = $("#expenseCard").text().replace("$ ", "").replace(",", "");
+  var i = $("#incomeCard").text().replace("$ ", "").replace(",", "");;
+  e = parseFloat(e);
+  i = parseFloat(i);
+  var realE = (e - i).toFixed(2);
+  $("#expenseCard").text("$ " + numberWithCommas(realE));
+  $("#savingCard").text(((i - realE)/i * 100.0).toFixed(2) + "%"); 
+}
+
+function queryIncome() {
+  $.getJSON('/queryIncome', {userId:userIdVal}, function(data) {
+    $("#incomeCard").text("$ " + numberWithCommas(data.result["income"]));
+    querySavingRate();
   });
 }
 
@@ -230,6 +246,7 @@ function setColorArray(color) {
 function queryExpenses() {
   $.getJSON('/queryExpense', {userId: userIdVal}, function(data) {
     var resultArray = data.result["result"];
+    console.log(resultArray);
     $("#editExpenseResult").empty();
     var removeButton = '<div class="col s1"><a class="removeExpense btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></div>';
     for(var i = 0; i < resultArray.length; i++) {
@@ -252,6 +269,7 @@ function queryExpenses() {
         if(data.result["status"] == "ok") {
           o.remove();
           calculateMonthlyExpenses();
+          queryIncome();
         }
       });
     });
@@ -298,6 +316,7 @@ function addExpenseButtonHandler() {
       calculateMonthlyExpenses();
       calculateAllocation();
       confirmationAnimation("#addExpenseIcon", ["input[name='expenseName']", "input[name='expenseAmount']", "input[name='expenseDate']"]);
+      queryIncome();
     });  
   }
   else {
