@@ -22,7 +22,7 @@
                     <h5 class="light"> The Personal Finance Assistant</h5>
                     <div class="input-field col s5">
                       <input value="" type="text" placeholder="Username" name="usr" class="validate">
-                      
+
                     </div>
                     <div class="input-field col s5">
                       <input value="" type="password" name="pwd" placeholder="Password" class="validate">
@@ -73,43 +73,37 @@
                     <div align="center" id="cashFlowView">
                         <h4 class="light">Cash Flow Summary</h4>
                     </div>
-                    
+
                     <div align="center" id="allocationView">
                         <h4 class="light">Spending Allocation</h4>
                     </div>
-                    
+
                     <div id="editView">
                         <h4 class="light">Add/Edit Category</h4>
                         <div class="row" id="addCategoryRow">
-                            <div class="col s6">
-                                <input value="" name="addCateg" placeholder="Ex: Food" type="text">
-                                <label>Category</label>
-                            </div>
-                            <div class="col s5">
-                                <input value="" name="addSubCateg" type="text" placeholder="Ex: Eating Out">
-                                <label>Sub-Category</label>
-                            </div>
-                            <div class="col s1">
-                                  <a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addCategoryIcon" class="material-icons">add</i></a>
-                            </div> 
+                            <table class="hoverable centered col s11">
+                                <tr>
+                                    <td><input value="" name="addCateg" placeholder="Category" type="text"></td>
+                                    <td style="opacity:0"><input name="" value="" placeholder="Expense Name" type="text"></td>
+                                    <td style="opacity:0"><input name="" value="" type="text" placeholder="Amount"></td>
+                                    <td style="opacity:0"><input name="" value="" placeholder="mm/dd/yyyy Date" type="text"></td>
+                                    <td><a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addCategoryIcon" class="material-icons">add</i></a></td>
+                                </tr>
+                            </table>
                         </div>
-                        <div id="editCategoryResult"></div>
+                        <div id="editCategoryResult" class="row"></div>
                         <h4 class="light">Record an Expense</h4>
                         <div id="record">
                             <div class="row" id="addExpenseRow">
-                                <div class="col s2">
-                                    <select class="browser-default" id="selectCategory">                            
-                                    </select>
-                                </div>
-                                <div class="col s2">
-                                    <select class="browser-default" id="selectSubCategory">
-                                        <option value="" disabled selected>Sub-Category</option>
-                                    </select>
-                                </div>
-                                <div class="col s3"><input name="expenseName" value="" placeholder="Expense Name" type="text"></div>
-                                <div class="col s2"><input name="expenseAmount" value="" type="text" placeholder="Amount"></div>
-                                <div class="col s2"><input name="expenseDate" value="" placeholder="mm/dd/yyyy Date" type="text"></div>
-                                <div class="col s1"><a id="addExpenseButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addExpenseIcon" class="material-icons">add</i></a></div>
+                                <table class="hoverable centered col s11">
+                                    <tr>
+                                        <td><select class="browser-default" id="selectCategory"></select></td>
+                                        <td><input name="expenseName" value="" placeholder="Expense Name" type="text"></td>
+                                        <td><input name="expenseAmount" value="" type="text" placeholder="Amount"></td>
+                                        <td><input name="expenseDate" type="date" class="datepicker"></td>
+                                        <td><a id="addExpenseButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addExpenseIcon" class="material-icons">add</i></a></td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
                         <div id="editExpenseResult"></div>
@@ -117,15 +111,19 @@
                         <div id="editNetWorth">
                             <table class="hoverable centered">
                                 <tr><th>Assets</th><th></th></tr>
-                                <tr><td>Cash</td><td><input value="" name="cash" type="text"></td></tr>
-                                <tr><td>Investments</td><td><input value="" name="investments" type="text"></td></tr>
-                                <tr><td>Property</td><td><input value="" name="property" type="text"></td></tr>
-                                <tr><td>Retirement</td><td><input value="" name="retirement" type="text"></td></tr>
+                                <tr>
+                                    <td><input value="" name="cash" type="text"><label>Cash</label></td>
+                                    <td><input value="" name="investments" type="text"><label>Investments</label></td>
+                                    <td><input value="" name="property" type="text"><label>Property</label></td>
+                                    <td><input value="" name="retirement" type="text"><label>Retirement</label></td>
+                                </tr>
                                 <tr><th>Liabilities</th><th></th></tr>
-                                <tr><td>Loan</td><td><input value="" name="loan" type="text"></td></tr>
-                                <tr><td>Debt</td><td><input value="" name="debt" type="text"></td></tr>
-                                <tr><td>Mortgages</td><td><input value="" name="morgages" type="text"></td></tr>
-                                <tr><td></td><td><a class="waves-effect waves-light btn" id="editNetButton"><i class="material-icons navItem">save</i></a></td></tr>
+                                <tr>
+                                    <td><input value="" name="loan" type="text"><label>Loan</label></td>
+                                    <td><input value="" name="debt" type="text"><label>Debt</label></td>
+                                    <td><input value="" name="morgages" type="text"><label>Morgages</label></td>
+                                    <td><a class="waves-effect waves-light btn" id="editNetButton"><i class="material-icons navItem">save</i></a></td>
+                                </tr>
                             </table>
                         </div>
                     </div>

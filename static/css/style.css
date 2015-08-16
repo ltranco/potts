@@ -58,3 +58,13 @@ body {
 #editView {
 	margin-top: 55px;
 }
+
+.removeCateg {
+    margin:-4px 0 0 10px !important;
+    width: 25px !important;
+    height: 25px !important;
+}
+
+.smallRemove {
+    line-height:25px !important;
+}
