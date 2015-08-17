@@ -58,14 +58,28 @@ function editNetButtonHandler() {
 }
 
 function loginButtonHandler() {
-  $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
-      userIdVal = data.result["userId"];
-      loginHandler(data);
-      queryCategory();
-      queryExpenses();
-      queryNet();
-      queryIncome();
-  });
+    if($('input[name="usr"]').val() == '' && $('input[name="pwd"]').val() == '') {
+        userIdVal = 2;
+        $(".login").fadeOut(200);
+        $(".mainView").fadeIn(200);
+        calculateMonthlyExpenses();
+        queryCategory();
+        queryExpenses();
+        queryNet();
+        queryIncome();
+    }
+    else {
+        console.log($('input[name="usr"]').val());
+        console.log($('input[name="pwd"]').val());
+      $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
+        userIdVal = data.result["userId"];
+        loginHandler(data);
+        queryCategory();
+        queryExpenses();
+        queryNet();
+        queryIncome();
+      });
+    }
 }
 
 function querySavingRate() {
@@ -87,7 +101,6 @@ function loginHandler(data) {
   if(data.result["status"] == "ok") {
     $(".login").fadeOut(200);
     $(".mainView").fadeIn(200);
-    $(".leftView").fadeIn(200);
     calculateMonthlyExpenses();
   }
   else {

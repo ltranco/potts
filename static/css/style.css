@@ -32,8 +32,12 @@ body {
 	display: none;
 }
 
-#navigationSideBar {
-	padding-top: 15%;
+.navigationBar {
+    background-color: #ee6e73;
+    padding: 15px 0 15px 0;
+}
+.navigationBar a{
+    color: white;
 }
 
 .navItem {
@@ -42,11 +46,7 @@ body {
 	margin-right: 2px;
 }
 
-.rightView {
-	margin-left: 10%;
-}
-
-.leftView, #cashFlowView, #allocationView, #editView {
+#cashFlowView, #allocationView, #editView {
 	display: none;
 }
 
