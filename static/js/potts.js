@@ -103,26 +103,41 @@ function queryGoal() {
         var goals = data.result["result"], g = $("#editGoalResult");
         var categ = [], expected = [], current = [];
         var rm = '<a class="removeGoal btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a>';
-        g.empty().append("<thead><tr><th>Goal</th><th>Expected</th><th>Current</th><th></th></tr></thead>");
+        var sv = '<a class="saveGoal btn-floating btn-small waves-effect waves-light accent-4 green"><i class="material-icons">save</i></a>';
+        g.empty().append("<thead><tr><th>Goal</th><th>Expected</th><th>Current</th><th></th><th></th></tr></thead>");
         for(var i in goals) {
             categ.push(goals[i][0]);
             expected.push(goals[i][1]);
             current.push(goals[i][2]);
             g.append("<tr><td class='gN'>" + goals[i][0] + "</td>" +
-                    "<td class='exA'>" + goals[i][1] + "</td>" +
-                    "<td class='cuA'>" + goals[i][2] + "</td><td>" +
+                    "<td><input class='exA' name='editExA' type='text' value='" + goals[i][1] + "'></td>" +
+                    "<td><input class='cuA' name='editCuA' type='text' value='" + goals[i][2] + "'></td>" +
+                    "<td width='50px'>" + sv + "</td><td>" +
                     rm + "</td></tr>");
         }
 
         goalTable.destroy();
         goalTable = $("#editGoalResult").DataTable({"bInfo" : false, "iDisplayLength": 5});
 
+        $(".saveGoal").click(function() {
+            var g = $(this).parent().parent();
+            var n = g.find("td.gN").text();
+            var newEx = g.find("input.exA").val();
+            var newCu = g.find("input.cuA").val();
+            console.log(newEx);
+            console.log(newCu);
+            $.getJSON('/updateGoal', {userId: userIdVal, name: n, exAmount:newEx, curAmount:newCu}, function(data) {
+                if(data.result["status"] = "ok") {
+                    queryGoal();
+                }
+            });
+        });
+
         $(".removeGoal").click(function() {
             var g = $(this).parent().parent();
             var n = g.find("td.gN").text();
-            var e = g.find("td.exA").text();
-            var c = g.find("td.cuA").text();
-            console.log(g);
+            var e = g.find("input.exA").text();
+            var c = g.find("input.cuA").text();
             $.getJSON('/delGoal', {userId: userIdVal, name: n, exAmount:e, curAmount:c}, function(data) {
                 if(data.result["status"] == "ok") {
                     g.remove();

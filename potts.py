@@ -238,6 +238,17 @@ def del_goal():
         print e
         return jsonify(result={"status":"failed"})
 
+@app.route("/updateGoal")
+def update_goal():
+    try:
+        command = "UPDATE Goal SET expected=%f, current=%f WHERE userId=%d AND name=\'%s\'" % tuple(get_args(["exAmount", "curAmount", "userId", "name"]))
+        db.query(command)
+        db.commit()
+        return jsonify(result={"status":"ok"})
+    except Exception as e:
+        print "Line 249: ",
+        print e
+        return jsonify(result={"status":"failed"})
 @app.route("/")
 def index():
 	return render_template('index.html')
