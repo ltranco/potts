@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
     <link rel="stylesheet" type="text/css" href="static/css/materialize.min.css" media="screen,projection"/>
     <body>
-        <div class="row">
+        <div class="row loginRow">
             <div class="login col s10 m6 l4">
                 <h3 class="light">Potts</h3>
                 <h5 class="light"> The Personal Finance Assistant</h5>
@@ -19,109 +19,123 @@
         </div>
         <div class="mainView">
             <div class="row navigationBar">
-                <div class="col s12 m4 l4"><a id="cashFlowViewButton" class="waves-effect waves-orange lighten-1"><i class="material-icons navItem">attach_money</i>CASH FLOW</a></div>
-                <div class="col s12 m4 l4"><a id="allocationViewButton" class="waves-effect waves-orange lighten-3"><i class="material-icons navItem">shopping_cart</i>ALLOCATION</a></div>
-                <div class="col s12 m4 l4"><a id="editViewButton" class="waves-effect waves-orange lighten-5"><i class="material-icons navItem">mode_edit</i>EDIT</a></div>
+                <div class="col s6 m3 l3"><a id="cashFlowViewButton" class="waves-effect waves-orange lighten-1"><i class="material-icons navItem">attach_money</i>CASH FLOW</a></div>
+                <div class="col s6 m3 l3"><a id="allocationViewButton" class="waves-effect waves-orange lighten-3"><i class="material-icons navItem">shopping_cart</i>ALLOCATION</a></div>
+                <div class="col s6 m3 l3"><a id="goalViewButton" class="waves-effect waves-orange lighten-5"><i class="material-icons navItem">hourglass_empty</i>GOALS</a></div>
+                <div class="col s6 m3 l3"><a id="editViewButton" class="waves-effect waves-orange lighten-5"><i class="material-icons navItem">mode_edit</i>EDIT</a></div>
             </div>
             <div class="row">
                 <div class="col s12">
                     <div class="">
-                            <div class="snapshot">
-                                <div class="row">
-                                    <div class="col s12 m3 l3">
-                                        <div class="card amber darken-3">
-                                            <div class="card-content white-text">
-                                                <span class="card-title" id="netCard"></span>
-                                                <p>Net Worth</p>
-                                            </div>
+                        <div class="snapshot">
+                            <div class="row">
+                                <div class="col s12 m3 l3">
+                                    <div class="card amber darken-3">
+                                        <div class="card-content white-text">
+                                            <span class="card-title" id="netCard"></span>
+                                            <p>Net Worth</p>
                                         </div>
                                     </div>
-                                    <div class="col s12 m3 l3">
-                                        <div class="card amber darken-3">
-                                            <div class="card-content white-text">
-                                                <span class="card-title" id="savingCard"></span>
-                                                <p>Saving Rate</p>
-                                            </div>
+                                </div>
+                                <div class="col s12 m3 l3">
+                                    <div class="card amber darken-3">
+                                        <div class="card-content white-text">
+                                            <span class="card-title" id="savingCard"></span>
+                                            <p>Saving Rate</p>
                                         </div>
                                     </div>
-                                    <div class="col s12 m3 l3">
-                                        <div class="card amber darken-3">
-                                            <div class="card-content white-text">
-                                                <span class="card-title" id="incomeCard"></span>
-                                                <p>Income</p>
-                                            </div>
+                                </div>
+                                <div class="col s12 m3 l3">
+                                    <div class="card amber darken-3">
+                                        <div class="card-content white-text">
+                                            <span class="card-title" id="incomeCard"></span>
+                                            <p>Income</p>
                                         </div>
                                     </div>
-                                    <div class="col s12 m3 l3">
-                                        <div class="card amber darken-3">
-                                            <div class="card-content white-text">
-                                                <span id="expenseCard" class="card-title"></span>
-                                                <p>Expenses</p>
-                                            </div>
+                                </div>
+                                <div class="col s12 m3 l3">
+                                    <div class="card amber darken-3">
+                                        <div class="card-content white-text">
+                                            <span id="expenseCard" class="card-title"></span>
+                                            <p>Expenses</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div align="center" id="cashFlowView">
-                                <h4 class="light">Cash Flow Summary</h4>
+                        <div align="center" id="cashFlowView">
+                            <h4 class="light">Cash Flow Summary</h4>
+                        </div>
+
+                        <div align="center" id="allocationView">
+                            <h4 class="light">Spending Allocation</h4>
+                        </div>
+
+                        <div align="center" id="goalView">
+                            <h4 class="light">Goals</h4>
+                        </div>
+
+                        <div id="editView">
+                            <h4 class="light">Add/Edit Category</h4>
+                            <div class="row" id="addCategoryRow">
+                                <table class="hoverable centered">
+                                    <tr>
+                                        <td><input value="" name="addCateg" placeholder="Category" type="text"></td>
+                                        <td><a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addCategoryIcon" class="material-icons">add</i></a></td>
+                                    </tr>
+                                </table>
                             </div>
-
-                            <div align="center" id="allocationView">
-                                <h4 class="light">Spending Allocation</h4>
-                            </div>
-
-                            <div id="editView">
-                                <h4 class="light">Add/Edit Category</h4>
-                                <div class="row" id="addCategoryRow">
-                                    <table class="hoverable centered col s11">
-                                        <tr>
-                                            <td><input value="" name="addCateg" placeholder="Category" type="text"></td>
-                                            <td style="opacity:0"><input name="" value="" placeholder="Expense Name" type="text"></td>
-                                            <td style="opacity:0"><input name="" value="" type="text" placeholder="Amount"></td>
-                                            <td style="opacity:0"><input name="" value="" placeholder="mm/dd/yyyy Date" type="text"></td>
-                                            <td><a id="addCategoryButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addCategoryIcon" class="material-icons">add</i></a></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div id="editCategoryResult" class="row"></div>
-                                <h4 class="light">Record an Expense</h4>
-                                <div id="record">
-                                    <div class="row" id="addExpenseRow">
-                                        <table class="hoverable centered col s11">
-                                            <tr>
-                                                <td><select class="browser-default" id="selectCategory"></select></td>
-                                                <td><input name="expenseName" value="" placeholder="Expense Name" type="text"></td>
-                                                <td><input name="expenseAmount" value="" type="text" placeholder="Amount"></td>
-                                                <td><input name="expenseDate" type="date" class="datepicker"></td>
-                                                <td><a id="addExpenseButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addExpenseIcon" class="material-icons">add</i></a></td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                                <table id="editExpenseResult"></table>
-                                <h4 class="light">Edit Personal Networth</h4>
-                                <div id="editNetWorth">
+                            <div id="editCategoryResult" class="row"></div>
+                            <h4 class="light">Record an Expense</h4>
+                            <div id="record">
+                                <div class="row" id="addExpenseRow">
                                     <table class="hoverable centered">
-                                        <tr><th>Assets</th><th></th></tr>
                                         <tr>
-                                            <td><input value="" name="cash" type="text"><label>Cash</label></td>
-                                            <td><input value="" name="investments" type="text"><label>Investments</label></td>
-                                            <td><input value="" name="property" type="text"><label>Property</label></td>
-                                            <td><input value="" name="retirement" type="text"><label>Retirement</label></td>
-                                        </tr>
-                                        <tr><th>Liabilities</th><th></th></tr>
-                                        <tr>
-                                            <td><input value="" name="loan" type="text"><label>Loan</label></td>
-                                            <td><input value="" name="debt" type="text"><label>Debt</label></td>
-                                            <td><input value="" name="morgages" type="text"><label>Morgages</label></td>
-                                            <td><a class="waves-effect waves-light btn" id="editNetButton"><i class="material-icons navItem">save</i></a></td>
+                                            <td><select class="browser-default" id="selectCategory"></select></td>
+                                            <td><input name="expenseName" value="" placeholder="Expense Name" type="text"></td>
+                                            <td><input name="expenseAmount" value="" type="text" placeholder="Amount"></td>
+                                            <td><input name="expenseDate" type="date" class="datepicker"></td>
+                                            <td><a id="addExpenseButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addExpenseIcon" class="material-icons">add</i></a></td>
                                         </tr>
                                     </table>
                                 </div>
                             </div>
+                            <table class="striped" id="editExpenseResult"><thead><tr><th>Category</th><th>Expense</th><th>Amount</th><th>Date</th><th></th></tr></thead></table>
+                            <h4 class="light">Edit Goals</h4>
+                            <div class="row" id="addGoalRow">
+                                <table class="hoverable centered">
+                                    <tr>
+                                        <td><input value="" name="addGoal" placeholder="Name" type="text"></td>
+                                        <td><input value="" name="exAmt" placeholder="Expected Amount" type="text"></td>
+                                        <td><input value="" name="curAmt" placeholder="Current Amount" type="text"></td>
+                                        <td><a id="addGoalButton" class="btn-floating btn-small waves-effect waves-light green accent-4"><i id="addGoalIcon" class="material-icons">add</i></a></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <table class="striped" id="editGoalResult"><thead><tr><th>Goal</th><th>Expected</th><th>Current</th><th></th></tr></thead></table>
+                            <h4 class="light">Edit Personal Networth</h4>
+                            <div id="editNetWorth">
+                                <table class="hoverable centered">
+                                    <tr><th>Assets</th><th></th></tr>
+                                    <tr>
+                                        <td><input value="" name="cash" type="text"><label>Cash</label></td>
+                                        <td><input value="" name="investments" type="text"><label>Investments</label></td>
+                                        <td><input value="" name="property" type="text"><label>Property</label></td>
+                                        <td><input value="" name="retirement" type="text"><label>Retirement</label></td>
+                                    </tr>
+                                    <tr><th>Liabilities</th><th></th></tr>
+                                    <tr>
+                                        <td><input value="" name="loan" type="text"><label>Loan</label></td>
+                                        <td><input value="" name="debt" type="text"><label>Debt</label></td>
+                                        <td><input value="" name="morgages" type="text"><label>Morgages</label></td>
+                                        <td><a class="waves-effect waves-light btn" id="editNetButton"><i class="material-icons navItem">save</i></a></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
-                            <br><br><br><br><br><br><br><br>
+                        <br><br><br><br><br><br><br><br>
                     </div>
                 </div>
             </div>

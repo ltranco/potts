@@ -1,14 +1,18 @@
 var userIdVal = -1;
-var views = ["#cashFlowView", "#allocationView", "#editView"];
+var views = ["#cashFlowView", "#allocationView", "#editView", "#goalView"];
 var netFields = ["cash", "investments", "property", "retirement", "loan", "debt", "morgages"];
+var expenseTable = $("#editExpenseResult").DataTable({"bInfo" : false, "iDisplayLength": 5});
+var goalTable = $('#editGoalResult').DataTable({"bInfo" : false, "iDisplayLength": 5});
 
 function Potts() {
   $("#loginButton").click(function() {loginButtonHandler();});
   $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
   $("#addExpenseButton").click(function() {addExpenseButtonHandler();});
   $("#editNetButton").click(function() {editNetButtonHandler();});
+  $("#addGoalButton").click(function() {addGoalButtonHandler();});
   $("#cashFlowViewButton").click(function() {displayView("#cashFlowViewButton");});
   $("#allocationViewButton").click(function() {displayView("#allocationViewButton");});
+  $("#goalViewButton").click(function() {displayView("#goalViewButton");});
   $("#editViewButton").click(function() {displayView("#editViewButton");});
   bindEnterKey("input[name='usr']", loginButtonHandler);
   bindEnterKey("input[name='pwd']", loginButtonHandler);
@@ -23,6 +27,9 @@ function Potts() {
   bindEnterKey("input[name='loan']", editNetButtonHandler);
   bindEnterKey("input[name='debt']", editNetButtonHandler);
   bindEnterKey("input[name='morgages']", editNetButtonHandler);
+  bindEnterKey("input[name='addGoal']", addGoalButtonHandler);
+  bindEnterKey("input[name='exAmt']", addGoalButtonHandler);
+  bindEnterKey("input[name='curAmt']", addGoalButtonHandler);
 }
 
 function queryNet() {
@@ -66,13 +73,15 @@ function editNetButtonHandler() {
 function loginButtonHandler() {
     if($('input[name="usr"]').val() == '' && $('input[name="pwd"]').val() == '') {
         userIdVal = 2;
-        $(".login").fadeOut(200);
+        $(".login").fadeOut();
+        $(".loginRow").fadeOut();
         $(".mainView").fadeIn(200);
         calculateMonthlyExpenses();
         queryCategory();
         queryExpenses();
         queryNet();
         queryIncome();
+        queryGoal();
     }
     else {
         console.log($('input[name="usr"]').val());
@@ -84,8 +93,45 @@ function loginButtonHandler() {
         queryExpenses();
         queryNet();
         queryIncome();
+        queryGoal();
       });
     }
+}
+
+function queryGoal() {
+    $.getJSON('/queryGoal', {userId:userIdVal}, function(data) {
+        var goals = data.result["result"], g = $("#editGoalResult");
+        var categ = [], expected = [], current = [];
+        var rm = '<a class="removeGoal btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a>';
+        g.empty().append("<thead><tr><th>Goal</th><th>Expected</th><th>Current</th><th></th></tr></thead>");
+        for(var i in goals) {
+            categ.push(goals[i][0]);
+            expected.push(goals[i][1]);
+            current.push(goals[i][2]);
+            g.append("<tr><td class='gN'>" + goals[i][0] + "</td>" +
+                    "<td class='exA'>" + goals[i][1] + "</td>" +
+                    "<td class='cuA'>" + goals[i][2] + "</td><td>" +
+                    rm + "</td></tr>");
+        }
+
+        goalTable.destroy();
+        goalTable = $("#editGoalResult").DataTable({"bInfo" : false, "iDisplayLength": 5});
+
+        $(".removeGoal").click(function() {
+            var g = $(this).parent().parent();
+            var n = g.find("td.gN").text();
+            var e = g.find("td.exA").text();
+            var c = g.find("td.cuA").text();
+            console.log(g);
+            $.getJSON('/delGoal', {userId: userIdVal, name: n, exAmount:e, curAmount:c}, function(data) {
+                if(data.result["status"] == "ok") {
+                    g.remove();
+                    queryGoal();
+                }
+            });
+        });
+        drawGoalChart(categ, expected, current);
+    });
 }
 
 function querySavingRate() {
@@ -105,6 +151,7 @@ function queryIncome() {
 
 function loginHandler(data) {
   if(data.result["status"] == "ok") {
+    $(".loginRow").fadeOut(200);
     $(".login").fadeOut(200);
     $(".mainView").fadeIn(200);
     calculateMonthlyExpenses();
@@ -145,6 +192,40 @@ function drawSpendingChart(spendingData) {
   $("#cashFlowView").prepend('<h4 class="light">Spending Summary</h4>');
 }
 
+function addGoalButtonHandler() {
+    var i1 = $('input[name="addGoal"]').val();
+    var i2 = $('input[name="exAmt"]').val();
+    var i3 = $('input[name="curAmt"]').val();
+    if(i1 != "" && !isNaN(i2) && !isNaN(i3)) {
+        console.log(i1 + i2 + i3);
+        $.getJSON('/addGoal', {userId: userIdVal, goalName: i1, exAmount:i2, curAmount:i3}, function(data) {
+            if(data.result["status"] == "ok") {
+                queryGoal();
+                confirmationAnimation("#addGoalIcon", ["input[name='addGoal']", "input[name='exAmt']", "input[name='curAmt']"]);
+            }
+        });
+    }
+    else {
+        $("#addGoalRow").effect("shake");
+    }
+}
+
+function drawGoalChart(categ, expected, current) {
+    $("#goalView").highcharts({
+        chart: {type: 'bar'},
+        title: {text: 'Goals'},
+        navigation: {buttonOptions: {enabled: false}},
+        xAxis: {categories: categ, title: {text: null}},
+        yAxis: {min: 0, title: {text: '$', align: 'high'}, labels: {overflow: 'justify'}},
+        tooltip: {valuePrefix: '$'},
+        colors: ["#00c96d", "#00A549"],
+        plotOptions: {bar: {dataLabels: {enabled: true}}},
+        legend: {layout: 'vertical', align: 'right', verticalAlign: 'top', x: -40, y: 80, floating: true, borderWidth: 1, backgroundColor: '#FFFFFF', shadow: true},
+        credits: {enabled: false},
+        series: [{name: 'Expected', data: expected}, {name: 'Current', data: current}]
+    });
+    $("#goalView").prepend('<h4 class="light">Goals</h4>');
+}
 function queryCategory() {
   $.getJSON('/queryCategory', {userId: userIdVal, excludeIncome:"false"}, function(data) {
       listCategory(data);
@@ -229,40 +310,34 @@ function getCategoryArray(data) {
 }
 
 function drawAllocationChart(data) {
-  setColorArray("#00c96d");
+  setColorArray("#00c96d", "pie");
   var dataArray = data;
   var options = {
     chart: {renderTo: 'allocationView', plotBackgroundColor: null, plotBorderWidth: null, plotShadow: false, type: 'pie'},
     title: {text: ""},
     tooltip: {pointFormat: '<b>{point.percentage:.1f}%</b>'},
-    plotOptions: {
-        pie: {
-            allowPointSelect: true,
-            cursor: 'pointer',
-            dataLabels: {
-                enabled: false
-            },
-            showInLegend: true
-        }
-    },
-    series: [{
-        colorByPoint: true,
-        data: dataArray
-    }],
+    plotOptions: {pie: {allowPointSelect: true, cursor: 'pointer', dataLabels: {enabled: false}, showInLegend: true}},
+    series: [{colorByPoint: true, data: dataArray}],
     navigation: {buttonOptions: {enabled: false}}
   };
   var chart = new Highcharts.Chart(options);
   $("#allocationView").prepend('<h4 class="light">Spending Allocation</h4>');
 }
 
-function setColorArray(color) {
-  Highcharts.getOptions().plotOptions.pie.colors = (function () {
-    var colors = [], base = color, i;
-    for (i = 0; i < 10; i += 1) {
-        colors.push(Highcharts.Color(base).brighten((i - 1) / 7).get());
+function setColorArray(color, type) {
+    var f = (function () {
+        var colors = [], base = color, i;
+        for (i = 0; i < 10; i += 1) {
+            colors.push(Highcharts.Color(base).brighten((i - 1) / 7).get());
+        }
+        return colors;
+    }());
+    if(type == "pie") {
+        Highcharts.getOptions().plotOptions.pie.colors = f;
     }
-    return colors;
-  }());
+    else if(type == "bar") {
+        Highcharts.getOptions().plotOptions.bar.colors = f;
+    }
 }
 
 function queryExpenses() {
@@ -277,7 +352,10 @@ function queryExpenses() {
                                         '<td class="eD">' + resultArray[i][3] + '</td>' +
                                         '<td><a class="removeExpense btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></td></tr>');
     }
-    $('#editExpenseResult').DataTable({"bInfo" : false});
+
+    expenseTable.destroy();
+    expenseTable = $("#editExpenseResult").DataTable({"bInfo" : false, "iDisplayLength": 5});
+
     $(".removeExpense").click(function() {
       var o = $(this).parent().parent();
       var c = o.find("td.eC").text();

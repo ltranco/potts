@@ -36,7 +36,9 @@ input[type=search] {
     width: 40% !important;
     margin-left: 5px !important;
 }
-
+th:hover, #editExpenseResult_paginate a:hover {
+    cursor: pointer;
+}
 .light {
     margin-top: 35px;
 }
@@ -55,20 +57,23 @@ input[type=search] {
 	margin-right: 2px;
 }
 
-#cashFlowView, #allocationView, #editView {
+#cashFlowView, #allocationView, #editView, #goalView {
 	display: none;
 }
 
-#cashFlowView, #allocationView {
+#cashFlowView, #allocationView, #goalView {
 	margin-top: 55px;
 	max-height: 500px;
 }
 
+thead {
+    border-bottom: 0px solid white !important;
+}
 #editView {
 	margin-top: 55px;
 }
 
-#editExpenseResult {
+#editExpenseResult, #editGoalResult {
     margin-left: 6%;
 }
 

@@ -33,7 +33,7 @@ class DB:
 db = DB()
 
 def get_args(l):
-    return [int(request.args.get(p)) if p == "userId" else round(float(request.args.get(p)), 2) if p == "eAmount" else request.args.get(p) for p in l]
+    return [int(request.args.get(p)) if p == "userId" else round(float(request.args.get(p)), 2) if "Amount" in p else request.args.get(p) for p in l]
 
 @app.route("/authenticate")
 def authenticate():
@@ -199,6 +199,42 @@ def query_income():
         return jsonify(result={"status":"ok", "income":round(float(data[0][0]), 2)})
     except Exception as e:
         print "Line 184: ",
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/addGoal")
+def add_goal():
+    try:
+        command = "INSERT INTO Goal VALUES (%d, \'%s\', %f, %f)" % tuple(get_args(["userId", "goalName", "exAmount", "curAmount"]))
+        db.query(command)
+        db.commit()
+        return jsonify(result={"status":"ok"})
+    except Exception as e:
+        print "Line 213: ",
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/queryGoal")
+def query_goal():
+    try:
+        userId = int(request.args.get("userId"))
+        command = "select name, expected, current from Goal where userId=%d" % userId
+        data = db.query(command)
+        return jsonify(result={"status":"ok", "result":data})
+    except Exception as e:
+        print "Line 256: ",
+        print e
+        return jsonify(result={"status":"failed"})
+
+@app.route("/delGoal")
+def del_goal():
+    try:
+        command = "DELETE FROM Goal WHERE userId=%d AND name=\'%s\'AND expected<=%f AND current<=%f" % tuple(get_args(["userId", "name", "exAmount", "curAmount"]))
+        db.query(command)
+        db.commit()
+        return jsonify(result={"status":"ok"})
+    except Exception as e:
+        print "Line 238: ",
         print e
         return jsonify(result={"status":"failed"})
 
