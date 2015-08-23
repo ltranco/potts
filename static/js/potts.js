@@ -16,6 +16,13 @@ function Potts() {
   bindEnterKey("input[name='expenseName']", addExpenseButtonHandler);
   bindEnterKey("input[name='expenseAmount']", addExpenseButtonHandler);
   bindEnterKey("input[name='expenseDate']", addExpenseButtonHandler);
+  bindEnterKey("input[name='cash']", editNetButtonHandler);
+  bindEnterKey("input[name='investments']", editNetButtonHandler);
+  bindEnterKey("input[name='property']", editNetButtonHandler);
+  bindEnterKey("input[name='retirement']", editNetButtonHandler);
+  bindEnterKey("input[name='loan']", editNetButtonHandler);
+  bindEnterKey("input[name='debt']", editNetButtonHandler);
+  bindEnterKey("input[name='morgages']", editNetButtonHandler);
 }
 
 function queryNet() {
@@ -30,6 +37,7 @@ function queryNet() {
 
 function sanitizeDictionary(d) {
     for(var k in d) {
+        d[k] = d[k].replace(/,/g, '');
         if(d[k] == "")
             d[k] = "0";
     }
@@ -40,8 +48,6 @@ function editNetButtonHandler() {
   var liabilityArray = {"loan":$("input[name='loan']").val(), "debt":$("input[name='debt']").val(), "morgages":$("input[name='morgages']").val()};
   assetArray = sanitizeDictionary(assetArray);
   liabilityArray = sanitizeDictionary(liabilityArray);
-  console.log(assetArray);
-  console.log(liabilityArray);
   $.getJSON('/editNet', {userId:userIdVal, asset:JSON.stringify(assetArray), liability:JSON.stringify(liabilityArray)}, function(data) {
     if(data.result["status"] == "ok") {
       var aSum = 0.0;
@@ -262,22 +268,22 @@ function setColorArray(color) {
 function queryExpenses() {
   $.getJSON('/queryExpense', {userId: userIdVal}, function(data) {
     var resultArray = data.result["result"];
-    console.log(resultArray);
-    $("#editExpenseResult").empty();
-    var removeButton = '<div class="col s1"><a class="removeExpense btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></div>';
+    var tableHeader = "<thead><tr><th>Category</th><th>Expense</th><th>Amount</th><th>Date</th><th></th></tr></thead>";
+    $("#editExpenseResult").empty().append(tableHeader);
     for(var i = 0; i < resultArray.length; i++) {
-      $("#editExpenseResult").append( '<div class="row"><div class="eC col s2"><p>'  + resultArray[i][0] + '</p></div>' +
-                                                        '<div class="eN col s3"><p>' + resultArray[i][1] + '</p></div>' +
-                                                        '<div class="eA col s3"><p>' + parseFloat(resultArray[i][2]).toFixed(2) + '</p></div>' +
-                                                        '<div class="eD col s2"><p>' + resultArray[i][3] + '</p></div>' +
-                                                        removeButton + '</div>');
+        $("#editExpenseResult").append( '<tr><td class="eC">' + resultArray[i][0] + '</td>' +
+                                        '<td class="eN">' + resultArray[i][1] + '</td>' +
+                                        '<td class="eA">' + parseFloat(resultArray[i][2]).toFixed(2) + '</td>' +
+                                        '<td class="eD">' + resultArray[i][3] + '</td>' +
+                                        '<td><a class="removeExpense btn-floating btn-small waves-effect waves-light red"><i class="material-icons">remove</i></a></td></tr>');
     }
+    $('#editExpenseResult').DataTable({"bInfo" : false});
     $(".removeExpense").click(function() {
       var o = $(this).parent().parent();
-      var c = o.find("div.eC p").text();
-      var n = o.find("div.eN p").text();
-      var a = o.find("div.eA p").text();
-      var d = o.find("div.eD p").text();
+      var c = o.find("td.eC").text();
+      var n = o.find("td.eN").text();
+      var a = o.find("td.eA").text();
+      var d = o.find("td.eD").text();
       d = formatToDateTime(d);
       $.getJSON('/delExpense', {userId: userIdVal, rCateg: c, rName:n, eAmount:a, rDate:d}, function(data) {
         if(data.result["status"] == "ok") {
