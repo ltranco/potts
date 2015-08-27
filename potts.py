@@ -182,7 +182,6 @@ def query_net():
         command = "select cash, investments, property, retirement, loan, debt, morgages from Net where userId=%d" % userId
 
         data = db.query(command)
-        print "Line 174, ",
         return jsonify(result={"status":"ok", "vals":list(data[0])})
     except Exception as e:
         print "Line 171: ",
@@ -206,6 +205,7 @@ def query_income():
 def add_goal():
     try:
         command = "INSERT INTO Goal VALUES (%d, \'%s\', %f, %f)" % tuple(get_args(["userId", "goalName", "exAmount", "curAmount"]))
+        print command
         db.query(command)
         db.commit()
         return jsonify(result={"status":"ok"})
@@ -230,6 +230,7 @@ def query_goal():
 def del_goal():
     try:
         command = "DELETE FROM Goal WHERE userId=%d AND name=\'%s\'AND expected<=%f AND current<=%f" % tuple(get_args(["userId", "name", "exAmount", "curAmount"]))
+        print command
         db.query(command)
         db.commit()
         return jsonify(result={"status":"ok"})

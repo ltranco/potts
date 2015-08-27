@@ -4,6 +4,20 @@ var netFields = ["cash", "investments", "property", "retirement", "loan", "debt"
 var expenseTable = $("#editExpenseResult").DataTable({"bInfo" : false, "iDisplayLength": 5});
 var goalTable = $('#editGoalResult').DataTable({"bInfo" : false, "iDisplayLength": 5});
 
+(function($) {
+    $.fn.closest_descendent = function(filter) {
+        var $found = $(),
+            $currentSet = this; // Current place
+        while ($currentSet.length) {
+            $found = $currentSet.filter(filter);
+            if ($found.length) break;  // At least one match: break loop
+            // Get all children of the current set
+            $currentSet = $currentSet.children();
+        }
+        return $found.first(); // Return first match of the collection
+    }
+})(jQuery);
+
 function Potts() {
   $("#loginButton").click(function() {loginButtonHandler();});
   $("#addCategoryButton").click(function() {addCategoryButtonHandler();});
@@ -84,8 +98,6 @@ function loginButtonHandler() {
         queryGoal();
     }
     else {
-        console.log($('input[name="usr"]').val());
-        console.log($('input[name="pwd"]').val());
       $.getJSON('/authenticate', {usr: $('input[name="usr"]').val(), pwd: $('input[name="pwd"]').val()}, function(data) {
         userIdVal = data.result["userId"];
         loginHandler(data);
@@ -136,8 +148,11 @@ function queryGoal() {
         $(".removeGoal").click(function() {
             var g = $(this).parent().parent();
             var n = g.find("td.gN").text();
-            var e = g.find("input.exA").text();
-            var c = g.find("input.cuA").text();
+            var e = g.find("input.exA").val();
+            var c = g.find("input.cuA").val();
+            console.log(n);
+            console.log(e);
+            console.log(c);
             $.getJSON('/delGoal', {userId: userIdVal, name: n, exAmount:e, curAmount:c}, function(data) {
                 if(data.result["status"] == "ok") {
                     g.remove();
@@ -371,21 +386,24 @@ function queryExpenses() {
     expenseTable.destroy();
     expenseTable = $("#editExpenseResult").DataTable({"bInfo" : false, "iDisplayLength": 5});
 
-    $(".removeExpense").click(function() {
-      var o = $(this).parent().parent();
-      var c = o.find("td.eC").text();
-      var n = o.find("td.eN").text();
-      var a = o.find("td.eA").text();
-      var d = o.find("td.eD").text();
-      d = formatToDateTime(d);
-      $.getJSON('/delExpense', {userId: userIdVal, rCateg: c, rName:n, eAmount:a, rDate:d}, function(data) {
-        if(data.result["status"] == "ok") {
-          o.remove();
-          calculateMonthlyExpenses();
-          calculateAllocation();
-          queryIncome();
+    $("#editExpenseResult tbody").on("click", "td", function(event){
+        var td = $(this);
+        if(td.index() == 4) {
+            var o = td.parent();
+            var c = o.find("td.eC").text();
+            var n = o.find("td.eN").text();
+            var a = o.find("td.eA").text();
+            var d = o.find("td.eD").text();
+            d = formatToDateTime(d);
+            $.getJSON('/delExpense', {userId: userIdVal, rCateg: c, rName:n, eAmount:a, rDate:d}, function(data) {
+                if(data.result["status"] == "ok") {
+                  o.remove();
+                  calculateMonthlyExpenses();
+                  calculateAllocation();
+                  queryIncome();
+                }
+            });
         }
-      });
     });
   });
 }
