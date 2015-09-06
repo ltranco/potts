@@ -249,10 +249,18 @@ function drawGoalChart(categ, expected, current) {
         yAxis: {min: 0, title: {text: '$', align: 'high'}, labels: {overflow: 'justify'}},
         tooltip: {valuePrefix: '$'},
         colors: ["#00c96d", "#00A549"],
-        plotOptions: {bar: {dataLabels: {enabled: true}}},
+        plotOptions: {bar: {dataLabels: {enabled: true,
+                                        formatter:function() {
+                                            if(this.series.name != "Expected") {
+                                                var ch = $('#goalView').highcharts();
+                                                var index = this.series.data.indexOf(this.point);
+                                                var pcnt = (this.y / ch.get("Ex").yData[index]) * 100;
+                                                return Highcharts.numberFormat(pcnt) + '%';
+                                            }
+                                        }}}},
         legend: {layout: 'vertical', align: 'right', verticalAlign: 'top', x: -40, y: 80, floating: true, borderWidth: 1, backgroundColor: '#FFFFFF', shadow: true},
         credits: {enabled: false},
-        series: [{name: 'Expected', data: expected}, {name: 'Current', data: current}]
+        series: [{id: 'Ex', name: 'Expected', data: expected}, {id:'Cu', name: 'Current', data: current}]
     });
     $("#goalView").prepend('<h4 class="light">Goals</h4>');
 }
