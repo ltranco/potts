@@ -136,8 +136,7 @@ function queryGoal() {
             var n = g.find("td.gN").text();
             var newEx = g.find("input.exA").val();
             var newCu = g.find("input.cuA").val();
-            console.log(newEx);
-            console.log(newCu);
+
             $.getJSON('/updateGoal', {userId: userIdVal, name: n, exAmount:newEx, curAmount:newCu}, function(data) {
                 if(data.result["status"] = "ok") {
                     queryGoal();
@@ -150,9 +149,7 @@ function queryGoal() {
             var n = g.find("td.gN").text();
             var e = g.find("input.exA").val();
             var c = g.find("input.cuA").val();
-            console.log(n);
-            console.log(e);
-            console.log(c);
+
             $.getJSON('/delGoal', {userId: userIdVal, name: n, exAmount:e, curAmount:c}, function(data) {
                 if(data.result["status"] == "ok") {
                     g.remove();
@@ -227,7 +224,6 @@ function addGoalButtonHandler() {
     var i2 = $('input[name="exAmt"]').val();
     var i3 = $('input[name="curAmt"]').val();
     if(i1 != "" && !isNaN(i2) && !isNaN(i3)) {
-        console.log(i1 + i2 + i3);
         $.getJSON('/addGoal', {userId: userIdVal, goalName: i1, exAmount:i2, curAmount:i3}, function(data) {
             if(data.result["status"] == "ok") {
                 queryGoal();
@@ -254,8 +250,10 @@ function drawGoalChart(categ, expected, current) {
                                             if(this.series.name != "Expected") {
                                                 var ch = $('#goalView').highcharts();
                                                 var index = this.series.data.indexOf(this.point);
-                                                var pcnt = (this.y / ch.get("Ex").yData[index]) * 100;
-                                                return Highcharts.numberFormat(pcnt) + '%';
+                                                var have = this.y;
+                                                var goal = ch.get("Ex").yData[index];
+                                                var pcnt = (have / goal) * 100;
+                                                return Highcharts.numberFormat(pcnt) + '% (Need ' + Highcharts.numberFormat(goal - have) + ' more dollars)';
                                             }
                                         }}}},
         legend: {layout: 'vertical', align: 'right', verticalAlign: 'top', x: -40, y: 80, floating: true, borderWidth: 1, backgroundColor: '#FFFFFF', shadow: true},
@@ -447,8 +445,7 @@ function addExpenseButtonHandler() {
   var i3 = $('input[name="expenseName"]').val();
   var i4 = $('input[name="expenseAmount"]').val();
   var i5 = $('input[name="expenseDate"]').val();
-  console.log(i5);
-  console.log(i5.match(/^(\d{4})-(\d{2})-(\d{2})$/));
+
   if(i1 != "Category" && !isNaN(i4) && i5.match(/^(\d{4})-(\d{2})-(\d{2})$/) != null) {
     $.getJSON('/insertExpense', {userId:userIdVal, categ:i1, eName:i3, eAmount:i4, eDate:i5}, function(data) {
       queryExpenses();
